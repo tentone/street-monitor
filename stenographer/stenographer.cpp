@@ -1,12 +1,24 @@
-﻿// stenographer.cpp : Defines the entry point for the application.
-//
+﻿#include <opencv2\opencv.hpp>
 
-#include "stenographer.h"
-
+using namespace cv;
 using namespace std;
 
-int main()
-{
-	cout << "Hello CMake." << endl;
+int main() {
+	Mat image;
+
+	namedWindow("Display window");
+	VideoCapture cap(0);
+
+	if (!cap.isOpened()) {
+		cout << "cannot open camera";
+	}
+
+	while (true) {
+		cap >> image;
+		imshow("Display window", image);
+		waitKey(25);
+	}
+
 	return 0;
+
 }
