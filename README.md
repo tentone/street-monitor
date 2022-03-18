@@ -3,7 +3,9 @@
 
 ### Gettings started
 
-- Download OpenCV and install it on your system.
+- Download OpenCV 4.2.0 and install it on your system.
+- Install CMAKE and setup your IDE for C++ development.
+- Install GCC for linux development or Visual Studio for windows development.
 
 ### License
 
