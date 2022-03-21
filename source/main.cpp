@@ -16,19 +16,19 @@ class Stenographer {
 
 
 
-            //-- Step 1: Detect the keypoints using SURF Detector
+            // Detect the keypoints using SURF Detector
             int minHessian = 400;
-            cv::Ptr<cv::SURF> detector = cv::SURF::create( minHessian );
+            cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
             std::vector<cv::KeyPoint> keypoints;
-            detector->detect(src, keypoints);
+            detector->detect(img, keypoints);
 
-            //-- Draw keypoints
+            // Draw keypoints
             cv::Mat img_keypoints;
-            cv::drawKeypoints(src, keypoints, img_keypoints);
+            cv::xfeatures2d::drawKeypoints(img, keypoints, img_keypoints);
 
-            //-- Show detected (drawn) keypoints
+            // Show detected (drawn) keypoints
             cv::imshow("SURF Keypoints", img_keypoints );
-            cv::imshow("Display window", img);
+            cv::imshow("Image window", img);
 
             // Wait for a keystroke in the window
             int k = cv::waitKey(0);
