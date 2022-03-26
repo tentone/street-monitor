@@ -14,8 +14,6 @@ class Stenographer {
                 return 1;
             }
 
-
-
             // Detect the keypoints using SURF Detector
             int minHessian = 400;
             cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
@@ -40,8 +38,6 @@ class Stenographer {
 
             return 0;
         }
-
-
 };
 
 int main()
