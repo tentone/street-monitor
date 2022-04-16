@@ -1,6 +1,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
 
 class Stenographer {
@@ -22,7 +23,7 @@ class Stenographer {
 
             // Draw keypoints
             cv::Mat img_keypoints;
-            cv::xfeatures2d::drawKeypoints(img, keypoints, img_keypoints);
+            cv::drawKeypoints(img, keypoints, img_keypoints);
 
             // Show detected (drawn) keypoints
             cv::imshow("SURF Keypoints", img_keypoints );
@@ -30,9 +31,11 @@ class Stenographer {
 
             // Wait for a keystroke in the window
             int k = cv::waitKey(0);
+
+            // Save image
             if(k == 's')
             {
-                cv::imwrite("starry_night.png", img);
+                cv::imwrite("test.png", img);
             }
 
 

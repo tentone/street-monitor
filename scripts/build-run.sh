@@ -5,4 +5,4 @@ cd ..
 cmake .
 make -j4
 
-./Stenographer
+./speed-camera
