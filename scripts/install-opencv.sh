@@ -12,6 +12,9 @@ echo "- Create libs folder"
 mkdir -p ../libs
 cd ../libs
 
+echo " - Update aptitude"
+apt update
+
 echo " - Installing Build tools"
 apt install -y cmake gcc g++ make git unzip
 
