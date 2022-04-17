@@ -1,13 +1,15 @@
+#include <iostream>
+#include <sstream>
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/xfeatures2d.hpp>
-#include <iostream>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/video.hpp>
 
-class Stenographer {
+class SpeedCamera {
     public:
         int main() {
             processVideo("highway-traffic.mp4");
@@ -41,7 +43,8 @@ class Stenographer {
                 cv::imshow( "Frame", frame );
                 
                 // surfFeatures(&frame);
-                opticalFlow(&frame);
+                // opticalFlow(&frame);
+                backgroundSub(&frame);
 
                 char c=(char)cv::waitKey(25);
                 if(c==27) {
@@ -64,7 +67,7 @@ class Stenographer {
 
             cv::cvtColor(*frame, next, cv::COLOR_BGR2GRAY);
             cv::Mat flow(opticalFlowFrame.size(), CV_32FC2);
-            cv::calcOpticalFlowFarneback(opticalFlowFrame, next, flow, 0.5, 3, 15, 3, 5, 1.2, 0);
+            cv::calcOpticalFlowFarneback(opticalFlowFrame, next, flow, 0.5, 3, 15, 3, 3, 3.0, 0);
 
             // Visualization
             cv::Mat flow_parts[2];
@@ -88,6 +91,26 @@ class Stenographer {
 
             opticalFlowFrame = next;
         }
+        
+        cv::Mat backgroundMask;
+        //cv::Ptr<cv::BackgroundSubtractor> backgroundSubtrator = cv::createBackgroundSubtractorKNN(500, 400, true);
+        cv::Ptr<cv::BackgroundSubtractor> backgroundSubtrator = cv::createBackgroundSubtractorMOG2(500, 16, true);
+        
+        void backgroundSub(cv::Mat *frame)
+        {
+            if (frame->empty()) {
+                return;
+            }
+
+            // Update the background model
+            backgroundSubtrator->apply(*frame, backgroundMask);
+            cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5), cv::Point(3, 3));
+            cv::erode(backgroundMask, backgroundMask, element);
+            cv::dilate(backgroundMask, backgroundMask, element);
+
+            // Show the current frame and the fg masks
+            cv::imshow("FG Mask", backgroundMask);
+        }
 
         // Calculate and display SURF features
         void surfFeatures(cv::Mat *frame) {
@@ -108,5 +131,5 @@ class Stenographer {
 
 int main()
 {
-    return Stenographer().main();
+    return SpeedCamera().main();
 }
