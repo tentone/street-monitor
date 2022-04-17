@@ -7,17 +7,16 @@ echo " - Install Python 3"
 apt install python3 python3-pip
 
 echo " - Install youtube-dl"
-pip3 install --upgrade youtube-dl
-
+pip3 install --upgrade yt-dlp
 echo " - Download dataset"
 
 echo "    - Highway traffic"
-youtube-dl https://www.youtube.com/watch?v=nt3D26lrkho
+yt-dlp https://www.youtube.com/watch?v=nt3D26lrkho -o highway-traffic.mp4
 
 echo "    - Highway Traffic Low Camera Shake"
-youtube-dl https://www.youtube.com/watch?v=KBsqQez-O4w
+yt-dlp https://www.youtube.com/watch?v=KBsqQez-O4w -o highway-traffic-shake.mp4
 
 echo "    - Night City Traffic"
-youtube-dl https://www.youtube.com/watch?v=iA0Tgng9v9U
+yt-dlp https://www.youtube.com/watch?v=iA0Tgng9v9U -o city-traffic-night.mp4
 
 echo " - Done!"
