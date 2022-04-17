@@ -51,3 +51,5 @@ Stenographer
 *.part
 
 *.mp4
+
+build/
