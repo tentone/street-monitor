@@ -61,7 +61,7 @@ class SpeedCamera {
         }
 
         // Calculate optical flow for new frame.
-        void opticalFlow(cv::Mat *frame)
+        void opticalFlowDense(cv::Mat *frame)
         {   
             cv::Mat next;
 
