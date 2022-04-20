@@ -12,7 +12,7 @@
 class SpeedCamera {
     public:
         int main() {
-            processVideo("highway-traffic.mp4");
+            processVideo("./dataset/highway-traffic.mp4");
             return 0;
         }
 
