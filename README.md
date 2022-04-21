@@ -8,6 +8,7 @@
 - Install CMAKE and setup your IDE for C++ development.
 - Install GCC for linux development or Visual Studio for windows development.
 - Dependencies can also be obtained from the conan package manager (https://conan.io/center/)
+    - To install dependencies run `conan install .`.
 
 
 ### Dataset
