@@ -7,6 +7,8 @@
 - Download OpenCV 4.2.0 and install it on your system (use scripts/install-opencv.sh).
 - Install CMAKE and setup your IDE for C++ development.
 - Install GCC for linux development or Visual Studio for windows development.
+- Dependencies can also be obtained from the conan package manager (https://conan.io/center/)
+
 
 ### Dataset
  - Data for testing can be downloaded from youtube.

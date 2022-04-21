@@ -14,6 +14,19 @@ apt install -y cmake gcc g++ make git unzip
 echo " - Install dependencies"
 apt install xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
 
+echo "- Create libs folder"
+mkdir -p ../libs
+cd ../libs
 
+echo " - Clone glfw repository"
+git clone https://github.com/glfw/glfw.git
 
-cmake -DBUILD_SHARED_LIBS=ON
+echo "    - Generate makefile"
+mkdir build
+cd build
+cmake -DBUILD_SHARED_LIBS=ON .. 
+
+echo "    - Build and Install"
+make install -j8
+
+echo " - Done!"
