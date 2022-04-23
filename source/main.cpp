@@ -109,7 +109,7 @@ class SpeedCamera {
             cv::dilate(backgroundMask, backgroundMask, element);
 
             // Show the current frame and the fg masks
-            cv::imshow("FG Mask", backgroundMask);
+            cv::imshow("Background Sub", backgroundMask);
         }
 
         // Calculate and display SURF features
