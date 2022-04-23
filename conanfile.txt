@@ -3,6 +3,7 @@ imgui/1.87
 glfw/3.3.7
 glew/2.2.0
 opencv/4.5.5
+ffmpeg/4.4
 
 [generators]
 cmake
