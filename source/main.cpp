@@ -8,6 +8,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/video.hpp>
+#include <opencv2/objdetect.hpp>
 
 class SpeedCamera {
     public:
@@ -44,6 +45,7 @@ class SpeedCamera {
                 
                 // surfFeatures(&frame);
                 // opticalFlow(&frame);
+                detectCars(&frame);
                 backgroundSub(&frame);
 
                 char c=(char)cv::waitKey(25);
@@ -58,6 +60,33 @@ class SpeedCamera {
 
             // Closes all the frames
             cv::destroyAllWindows();
+        }
+
+        void detectCars(cv::Mat *frame)
+        {
+            // Load a classifier from its XML description
+            cv::CascadeClassifier classifier("./models/car.xml");
+            
+            // Prepare a vector where the detected features will be stored
+            std::vector<cv::Rect> features;
+
+            // Grayscale version of the image
+            cv::Mat grayscale;
+
+            // Create a normalized, gray-scale version of the captured image
+            cv::cvtColor(*frame, grayscale, cv::COLOR_BGR2GRAY);
+            cv::equalizeHist(grayscale, grayscale);
+
+            // Detect the features in the normalized, gray-scale version of the image.
+            classifier.detectMultiScale(grayscale, features, 1.1, 3, cv::CASCADE_SCALE_IMAGE, cv::Size(30, 30));
+
+            // Draw each feature as a separate green rectangle
+            for (auto&& feature : features) {
+                cv::rectangle(*frame, feature, cv::Scalar(0, 255, 0), 2);
+            }
+
+            // Show the captured image and the detected features
+            cv::imshow("Cars", *frame);
         }
 
         // Calculate optical flow for new frame.

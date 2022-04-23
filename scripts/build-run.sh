@@ -2,6 +2,8 @@
 
 cd ..
 
+rm ./speed-camera
+
 cmake .
 make -j4
 
