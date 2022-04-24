@@ -10,7 +10,8 @@ class Car {
         // Identifier (sequential)
         int id;
 
-        // License plate 
+        // License plate
+        // std::string licensePlate;
 
         // Color of the car
         Color color;
