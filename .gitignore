@@ -55,3 +55,7 @@ Stenographer
 build/
 
 speed-camera
+
+source/yolo/CMakeLists.txt
+
+source/yolo/yolo

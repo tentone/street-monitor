@@ -73,7 +73,7 @@ class SpeedCamera {
         void detectCarsHaar(cv::Mat *frame)
         {
             // Load a classifier from its XML description
-            cv::CascadeClassifier classifier("./models/car.xml");
+            cv::CascadeClassifier classifier("./models/haar/car.xml");
             
             // Prepare a vector where the detected features will be stored
             std::vector<cv::Rect> features;
