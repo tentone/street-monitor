@@ -17,7 +17,8 @@
  - Data might be suject to licensing and not available for commercial usage, use at your own risk.
 
 ### Models
- - Pre-trained yolo V3 model can be obtained from https://pjreddie.com/darknet/yolo.
+ - YOLO model is used to detect cars and pedestrians.
+ - Pre-trained YOLO V3 model can be obtained from https://pjreddie.com/darknet/yolo or YOLO V5 from https://github.com/ultralytics/yolov5.
  - The YOLO V3 tiny model offers the best performance and is capable of detecting the required categories.
 
 ### License
