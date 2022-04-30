@@ -2,5 +2,6 @@
 
 int main()
 {
-    return SpeedCamera().main();
+    SpeedCamera().startVideo("./dataset/highway-traffic.mp4");
+    return 0;
 }

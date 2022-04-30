@@ -12,14 +12,28 @@
 
 class SpeedCamera {
     public:
-        int main() {
-            processVideo("./dataset/highway-traffic.mp4");
-            return 0;
-        }
-
         cv::Mat opticalFlowFrame;
 
-        void processVideo(char* fname) {
+        /**
+         * @brief Process a frame of the video feed, can be obtained from camera, video file, dataset etc.
+         * 
+         * @param fname 
+         */
+        void processFrame(cv::Mat *frame) {
+            cv::imshow( "Frame", *frame );
+            
+            // surfFeatures(frame);
+            // opticalFlow(frame);
+            detectCarsHaar(frame);
+            backgroundSub(frame);
+
+            cv::waitKey(1);
+        }
+
+        /**
+         * @brief Start the speed camera detector with a specific file
+         */
+        void startVideo(const std::string fname) {
             cv::VideoCapture cap(fname); 
 
             if(!cap.isOpened()) {
@@ -40,19 +54,8 @@ class SpeedCamera {
                 if (frame.empty()) {
                     break;
                 }
-                
-                cv::imshow( "Frame", frame );
-                
-                // surfFeatures(&frame);
-                // opticalFlow(&frame);
-                detectCarsHaar(&frame);
-                backgroundSub(&frame);
 
-                char c=(char)cv::waitKey(25);
-                if(c==27) {
-                    break;
-                }
-            
+                this->processFrame(&frame);           
             }
 
             // When everything done, release the video capture object
