@@ -16,6 +16,10 @@
  - The file scripts/dataset.sh can be used to obtain test data.
  - Data might be suject to licensing and not available for commercial usage, use at your own risk.
 
+### Models
+ - Pre-trained yolo V3 model can be obtained from https://pjreddie.com/darknet/yolo.
+ - The YOLO V3 tiny model offers the best performance and is capable of detecting the required categories.
+
 ### License
 - This project is distributed under MIT license and can be freely used for commercial applications.
 - Project license is available on the Github page.
