@@ -1,3 +1,5 @@
+#include <sstream>
+
 // Possible car colors detected
 enum Color { red, green, blue, black, white, grey };
 
@@ -11,7 +13,7 @@ class Car {
         int id;
 
         // License plate
-        // std::string licensePlate;
+        std::string licensePlate;
 
         // Color of the car
         Color color;
