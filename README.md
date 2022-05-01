@@ -16,10 +16,11 @@
  - The file scripts/dataset.sh can be used to obtain test data.
  - Data might be suject to licensing and not available for commercial usage, use at your own risk.
 
-### Models
+### DNN Models
  - YOLO model is used to detect cars and pedestrians.
- - Pre-trained YOLO V3 model can be obtained from https://pjreddie.com/darknet/yolo or YOLO V5 from https://github.com/ultralytics/yolov5.
- - The YOLO V3 tiny model offers the best performance and is capable of detecting the required categories.
+ - Pre-trained YOLO model can be obtained from the internet.
+    - Darknet YOLO V3 model can be obtained from https://pjreddie.com/darknet/yolo.
+    - YOLO V5 from https://github.com/ultralytics/yolov5, check the latest releases on github.
 
 ### License
 - This project is distributed under MIT license and can be freely used for commercial applications.

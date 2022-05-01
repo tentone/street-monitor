@@ -139,23 +139,21 @@ int main(int argc, char** argv)
 	bool useRGB = true;
 	
 	// Preprocess input image by resizing to a specific width.
-	int inpWidth = 800; // parser.get<int>("width");
-	std::cout << inpWidth << std::endl;
+	int inpWidth = 320;
 	
 	// Preprocess input image by resizing to a specific height.
-	int inpHeight = 480; // parser.get<int>("height");
-	std::cout << inpHeight << std::endl;
+	int inpHeight = 320;
 
 	size_t asyncNumReq = 0;
 
 	// Path to a binary file of model contains trained weights.
 	// It could be a file with extensions .caffemodel (Caffe),
 	// .pb (TensorFlow), .t7 or .net (Torch), .weights (Darknet), .bin (OpenVINO).
-	std::string modelPath = "../../models/yolo/yolov3-tiny.cfg";
+	std::string modelPath = "../../models/yolo/yolov3-320.cfg";
 
 	// Path to a text file of model contains network configuration. "
 	// It could be a file with extensions .prototxt (Caffe), .pbtxt (TensorFlow), .cfg (Darknet), .xml (OpenVINO).",
-	std::string configPath = "../../models/yolo/yolov3-tiny.weights";
+	std::string configPath = "../../models/yolo/yolov3-320.weights";
 	std::string input = "../../dataset/highway-traffic.mp4";
 
 	// Load a model.

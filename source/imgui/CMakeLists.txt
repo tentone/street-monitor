@@ -55,11 +55,15 @@ ExternalProject_Add(
     "-DGLFW_BUILD_EXAMPLES=OFF"
     "-DGLFW_BUILD_TESTS=OFF"
 )
+
 ExternalProject_Get_Property( glfw INSTALL_DIR )
 set( GLFW_DIR ${INSTALL_DIR} )
 set( GLFW_INCLUDE_DIR ${GLFW_DIR}/include )
 set( GLFW_LIBRARIES   ${GLFW_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw3${CMAKE_STATIC_LIBRARY_SUFFIX} )
 add_dependencies( sample glfw )
+
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
 
 if( OpenCV_FOUND AND OPENGL_FOUND )
   include_directories( ${IMGUI_DIR} )
