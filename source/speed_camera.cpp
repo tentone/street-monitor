@@ -13,12 +13,15 @@
 #include "yolo_detector.cpp"
 #include "optical_flow.cpp"
 #include "haar_detector.cpp"
+#include "background_subtractor.cpp"
 
 class SpeedCamera {
 	public:
 		OpticalFlow opticalFlow;
 
 		HaarDetector haarDetector;
+
+		BackgroundSubtractor backgroundSubtractor;
 
 		/**
 		 * @brief Process a frame of the video feed, can be obtained from camera, video file, dataset etc.
@@ -31,7 +34,7 @@ class SpeedCamera {
 			// surfFeatures(frame);
 			opticalFlow.dense(frame);
 			haarDetector.detect(frame, "./models/haar/car.xml");
-			backgroundSub(frame);
+			backgroundSubtractor.update(frame);
 
 			cv::waitKey(1);
 		}
@@ -72,34 +75,6 @@ class SpeedCamera {
 			cv::destroyAllWindows();
 		}
 
-
-		
-		cv::Mat backgroundMask;
-		//cv::Ptr<cv::BackgroundSubtractor> backgroundSubtrator = cv::createBackgroundSubtractorKNN(500, 400, true);
-		cv::Ptr<cv::BackgroundSubtractor> backgroundSubtrator = cv::createBackgroundSubtractorMOG2(500, 16, true);
-		
-		/**
-		 * @brief Perform background subtraction and return binary mask of moving objects. Background model is updated based on the last n frames.
-		 * 
-		 * Only efective when the camera is steady.
-		 * 
-		 * @param frame Frame to calculate moving objects.
-		 */
-		void backgroundSub(cv::Mat *frame)
-		{
-			if (frame->empty()) {
-				return;
-			}
-
-			// Update the background model
-			backgroundSubtrator->apply(*frame, backgroundMask);
-			cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5), cv::Point(3, 3));
-			cv::erode(backgroundMask, backgroundMask, element);
-			cv::dilate(backgroundMask, backgroundMask, element);
-
-			// Show the current frame and the fg masks
-			cv::imshow("Background Sub", backgroundMask);
-		}
 
 		/**
 		 * @brief Calculate and display SURF features for the entire image.
