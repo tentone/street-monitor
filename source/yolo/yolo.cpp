@@ -1,18 +1,19 @@
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
 #if defined(CV_CXX11) && defined(HAVE_THREADS)
-#define USE_THREADS 1
+	#define USE_THREADS 1
 #endif
 
 #ifdef USE_THREADS
-#include <mutex>
-#include <thread>
-#include <queue>
+	#include <mutex>
+	#include <thread>
+	#include <queue>
 #endif
 
 #include "common.hpp"
@@ -51,12 +52,11 @@ using namespace dnn;
 float confThreshold, nmsThreshold;
 std::vector<std::string> classes;
 
-inline void preprocess(const Mat& frame, Net& net, Size inpSize, float scale,
-					   const Scalar& mean, bool swapRB);
+inline void preprocess(const cv::Mat& frame, Net& net, Size inpSize, float scale, const cv::Scalar& mean, bool swapRB);
 
-void postprocess(Mat& frame, const std::vector<Mat>& out, Net& net, int backend);
+void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& out, Net& net, int backend);
 
-void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat& frame);
+void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame);
 
 void callback(int pos, void* userdata);
 
@@ -122,38 +122,41 @@ int main(int argc, char** argv)
 	keys += genPreprocArguments(modelName, zooFile);
 
 	parser = CommandLineParser(argc, argv, keys);
-	parser.about("Use this script to run object detection deep learning networks using OpenCV.");
-	if (argc == 1 || parser.has("help"))
-	{
-		parser.printMessage();
-		return 0;
-	}
 
-	confThreshold = parser.get<float>("thr");
-	nmsThreshold = parser.get<float>("nms");
-	float scale = parser.get<float>("scale");
-	Scalar mean = parser.get<Scalar>("mean");
-	bool swapRB = parser.get<bool>("rgb");
-	int inpWidth = parser.get<int>("width");
-	int inpHeight = parser.get<int>("height");
-	size_t asyncNumReq = parser.get<int>("async");
-	CV_Assert(parser.has("model"));
-	std::string modelPath = findFile(parser.get<String>("model"));
-	std::string configPath = findFile(parser.get<String>("config"));
+	// Confidence threshold.
+	confThreshold = 0.5;
+	
+	// Non-maximum suppression threshold.
+	nmsThreshold = 0.4;
 
-	// Open file with classes names.
-	if (parser.has("classes"))
-	{
-		std::string file = parser.get<String>("classes");
-		std::ifstream ifs(file.c_str());
-		if (!ifs.is_open())
-			CV_Error(Error::StsError, "File " + file + " not found");
-		std::string line;
-		while (std::getline(ifs, line))
-		{
-			classes.push_back(line);
-		}
-	}
+	// Preprocess input image by multiplying on a scale factor.
+	float scale = 1.0;
+
+	// Preprocess input image by subtracting mean values. Mean values should be in BGR order and delimited by spaces.
+	cv::Scalar mean = cv::Scalar(1.0); // parser.get<cv::Scalar>("mean");
+
+	// Indicate that model works with RGB input images instead BGR ones.
+	bool useRGB = true;
+	
+	// Preprocess input image by resizing to a specific width.
+	int inpWidth = 800; // parser.get<int>("width");
+	std::cout << inpWidth << std::endl;
+	
+	// Preprocess input image by resizing to a specific height.
+	int inpHeight = 480; // parser.get<int>("height");
+	std::cout << inpHeight << std::endl;
+
+	size_t asyncNumReq = 0;
+
+	// Path to a binary file of model contains trained weights.
+	// It could be a file with extensions .caffemodel (Caffe),
+	// .pb (TensorFlow), .t7 or .net (Torch), .weights (Darknet), .bin (OpenVINO).
+	std::string modelPath = "../../models/yolo/yolov3-tiny.cfg";
+
+	// Path to a text file of model contains network configuration. "
+	// It could be a file with extensions .prototxt (Caffe), .pbtxt (TensorFlow), .cfg (Darknet), .xml (OpenVINO).",
+	std::string configPath = "../../models/yolo/yolov3-tiny.weights";
+	std::string input = "../../dataset/highway-traffic.mp4";
 
 	// Load a model.
 	Net net = readNet(modelPath, configPath, parser.get<String>("framework"));
@@ -163,25 +166,22 @@ int main(int argc, char** argv)
 	std::vector<String> outNames = net.getUnconnectedOutLayersNames();
 
 	// Create a window
-	static const std::string kWinName = "Deep learning object detection in OpenCV";
-	namedWindow(kWinName, WINDOW_NORMAL);
-	int initialConf = (int)(confThreshold * 100);
-	createTrackbar("Confidence threshold, %", kWinName, &initialConf, 99, callback);
+	cv::namedWindow("YOLO", WINDOW_NORMAL);
+	// int initialConf = (int)(confThreshold * 100);
+	// cv::createTrackbar("Threshold, %", "YOLO", &initialConf, 99, callback);
 
 	// Open a video file or an image file or a camera stream.
 	VideoCapture cap;
-	if (parser.has("input"))
-		cap.open(parser.get<String>("input"));
-	else
-		cap.open(parser.get<int>("device"));
+	cap.open("../../dataset/highway-traffic.mp4");
+
 
 #ifdef USE_THREADS
 	bool process = true;
 
 	// Frames capturing thread
-	QueueFPS<Mat> framesQueue;
+	QueueFPS<cv::Mat> framesQueue;
 	std::thread framesThread([&](){
-		Mat frame;
+		cv::Mat frame;
 		while (process)
 		{
 			cap >> frame;
@@ -193,15 +193,15 @@ int main(int argc, char** argv)
 	});
 
 	// Frames processing thread
-	QueueFPS<Mat> processedFramesQueue;
-	QueueFPS<std::vector<Mat> > predictionsQueue;
+	QueueFPS<cv::Mat> processedFramesQueue;
+	QueueFPS<std::vector<cv::Mat> > predictionsQueue;
 	std::thread processingThread([&](){
 		std::queue<AsyncArray> futureOutputs;
-		Mat blob;
+		cv::Mat blob;
 		while (process)
 		{
 			// Get a next frame
-			Mat frame;
+			cv::Mat frame;
 			{
 				if (!framesQueue.empty())
 				{
@@ -209,7 +209,7 @@ int main(int argc, char** argv)
 					if (asyncNumReq)
 					{
 						if (futureOutputs.size() == asyncNumReq)
-							frame = Mat();
+							frame = cv::Mat();
 					}
 					else
 						framesQueue.clear();  // Skip the rest of frames
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
 				}
 				else
 				{
-					std::vector<Mat> outs;
+					std::vector<cv::Mat> outs;
 					net.forward(outs, outNames);
 					predictionsQueue.push(outs);
 				}
@@ -239,7 +239,7 @@ int main(int argc, char** argv)
 			{
 				AsyncArray async_out = futureOutputs.front();
 				futureOutputs.pop();
-				Mat out;
+				cv::Mat out;
 				async_out.get(out);
 				predictionsQueue.push({out});
 			}
@@ -252,23 +252,23 @@ int main(int argc, char** argv)
 		if (predictionsQueue.empty())
 			continue;
 
-		std::vector<Mat> outs = predictionsQueue.get();
-		Mat frame = processedFramesQueue.get();
+		std::vector<cv::Mat> outs = predictionsQueue.get();
+		cv::Mat frame = processedFramesQueue.get();
 
 		postprocess(frame, outs, net, backend);
 
 		if (predictionsQueue.counter > 1)
 		{
 			std::string label = format("Camera: %.2f FPS", framesQueue.getFPS());
-			putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
+			putText(frame, label, cv::Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
 
 			label = format("Network: %.2f FPS", predictionsQueue.getFPS());
-			putText(frame, label, Point(0, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
+			putText(frame, label, cv::Point(0, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
 
 			label = format("Skipped frames: %d", framesQueue.counter - predictionsQueue.counter);
-			putText(frame, label, Point(0, 45), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
+			putText(frame, label, cv::Point(0, 45), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
 		}
-		imshow(kWinName, frame);
+		cv::imshow("YOLO", frame);
 	}
 
 	process = false;
@@ -280,7 +280,7 @@ int main(int argc, char** argv)
 		CV_Error(Error::StsNotImplemented, "Asynchronous forward is supported only with Inference Engine backend.");
 
 	// Process frames.
-	Mat frame, blob;
+	cv::Mat frame, blob;
 	while (waitKey(1) < 0)
 	{
 		cap >> frame;
@@ -290,9 +290,9 @@ int main(int argc, char** argv)
 			break;
 		}
 
-		preprocess(frame, net, Size(inpWidth, inpHeight), scale, mean, swapRB);
+		preprocess(frame, net, Size(inpWidth, inpHeight), scale, mean, useRGB);
 
-		std::vector<Mat> outs;
+		std::vector<cv::Mat> outs;
 		net.forward(outs, outNames);
 
 		postprocess(frame, outs, net, backend);
@@ -302,53 +302,56 @@ int main(int argc, char** argv)
 		double freq = getTickFrequency() / 1000;
 		double t = net.getPerfProfile(layersTimes) / freq;
 		std::string label = format("Inference time: %.2f ms", t);
-		putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
+		putText(frame, label, cv::Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
 
-		imshow(kWinName, frame);
+		cv::imshow("YOLO", frame);
 	}
 #endif  // USE_THREADS
 	return 0;
 }
 
-inline void preprocess(const Mat& frame, Net& net, Size inpSize, float scale,
-					   const Scalar& mean, bool swapRB)
+inline void preprocess(const cv::Mat& frame, dnn::Net& net, Size inpSize, float scale,
+					   const cv::Scalar& mean, bool swapRB)
 {
-	static Mat blob;
+	static cv::Mat blob;
 	// Create a 4D blob from a frame.
 	if (inpSize.width <= 0) inpSize.width = frame.cols;
 	if (inpSize.height <= 0) inpSize.height = frame.rows;
-	blobFromImage(frame, blob, 1.0, inpSize, Scalar(), swapRB, false, CV_8U);
+	blobFromImage(frame, blob, 1.0, inpSize, cv::Scalar(), swapRB, false, CV_8U);
 
 	// Run a model.
 	net.setInput(blob, "", scale, mean);
 	if (net.getLayer(0)->outputNameToIndex("im_info") != -1)  // Faster-RCNN or R-FCN
 	{
 		resize(frame, frame, inpSize);
-		Mat imInfo = (Mat_<float>(1, 3) << inpSize.height, inpSize.width, 1.6f);
+		cv::Mat imInfo = (cv::Mat_<float>(1, 3) << inpSize.height, inpSize.width, 1.6f);
 		net.setInput(imInfo, "im_info");
 	}
 }
 
-void postprocess(Mat& frame, const std::vector<Mat>& outs, Net& net, int backend)
+void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, Net& net, int backend)
 {
 	static std::vector<int> outLayers = net.getUnconnectedOutLayers();
 	static std::string outLayerType = net.getLayer(outLayers[0])->type;
 
 	std::vector<int> classIds;
 	std::vector<float> confidences;
-	std::vector<Rect> boxes;
+	std::vector<cv::Rect> boxes;
+
 	if (outLayerType == "DetectionOutput")
 	{
 		// Network produces output blob with a shape 1x1xNx7 where N is a number of
 		// detections and an every detection is a vector of values
 		// [batchId, classId, confidence, left, top, right, bottom]
 		CV_Assert(outs.size() > 0);
+
 		for (size_t k = 0; k < outs.size(); k++)
 		{
 			float* data = (float*)outs[k].data;
 			for (size_t i = 0; i < outs[k].total(); i += 7)
 			{
 				float confidence = data[i + 2];
+
 				if (confidence > confThreshold)
 				{
 					int left   = (int)data[i + 3];
@@ -366,8 +369,9 @@ void postprocess(Mat& frame, const std::vector<Mat>& outs, Net& net, int backend
 						width  = right - left + 1;
 						height = bottom - top + 1;
 					}
+					
 					classIds.push_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
-					boxes.push_back(Rect(left, top, width, height));
+					boxes.push_back(cv::Rect(left, top, width, height));
 					confidences.push_back(confidence);
 				}
 			}
@@ -383,8 +387,8 @@ void postprocess(Mat& frame, const std::vector<Mat>& outs, Net& net, int backend
 			float* data = (float*)outs[i].data;
 			for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
 			{
-				Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
-				Point classIdPoint;
+				cv::Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
+				cv::Point classIdPoint;
 				double confidence;
 				minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
 				if (confidence > confThreshold)
@@ -398,16 +402,17 @@ void postprocess(Mat& frame, const std::vector<Mat>& outs, Net& net, int backend
 
 					classIds.push_back(classIdPoint.x);
 					confidences.push_back((float)confidence);
-					boxes.push_back(Rect(left, top, width, height));
+					boxes.push_back(cv::Rect(left, top, width, height));
 				}
 			}
 		}
 	}
 	else
+	{
 		CV_Error(Error::StsNotImplemented, "Unknown output layer type: " + outLayerType);
+	}
 
-	// NMS is used inside Region layer only on DNN_BACKEND_OPENCV for another backends we need NMS in sample
-	// or NMS is required if number of outputs > 1
+	// NMS is used inside Region layer only on DNN_BACKEND_OPENCV for another backends we need NMS in sample or NMS is required if number of outputs > 1
 	if (outLayers.size() > 1 || (outLayerType == "Region" && backend != DNN_BACKEND_OPENCV))
 	{
 		std::map<int, std::vector<size_t> > class2indices;
@@ -418,12 +423,12 @@ void postprocess(Mat& frame, const std::vector<Mat>& outs, Net& net, int backend
 				class2indices[classIds[i]].push_back(i);
 			}
 		}
-		std::vector<Rect> nmsBoxes;
+		std::vector<cv::Rect> nmsBoxes;
 		std::vector<float> nmsConfidences;
 		std::vector<int> nmsClassIds;
 		for (std::map<int, std::vector<size_t> >::iterator it = class2indices.begin(); it != class2indices.end(); ++it)
 		{
-			std::vector<Rect> localBoxes;
+			std::vector<cv::Rect> localBoxes;
 			std::vector<float> localConfidences;
 			std::vector<size_t> classIndices = it->second;
 			for (size_t i = 0; i < classIndices.size(); i++)
@@ -448,15 +453,15 @@ void postprocess(Mat& frame, const std::vector<Mat>& outs, Net& net, int backend
 
 	for (size_t idx = 0; idx < boxes.size(); ++idx)
 	{
-		Rect box = boxes[idx];
+		cv::Rect box = boxes[idx];
 		drawPred(classIds[idx], confidences[idx], box.x, box.y,
 				 box.x + box.width, box.y + box.height, frame);
 	}
 }
 
-void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat& frame)
+void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame)
 {
-	rectangle(frame, Point(left, top), Point(right, bottom), Scalar(0, 255, 0));
+	cv::rectangle(frame, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(0, 255, 0));
 
 	std::string label = format("%.2f", conf);
 	if (!classes.empty())
@@ -466,11 +471,11 @@ void drawPred(int classId, float conf, int left, int top, int right, int bottom,
 	}
 
 	int baseLine;
-	Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+	Size labelSize = cv::getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
 
 	top = max(top, labelSize.height);
-	rectangle(frame, Point(left, top - labelSize.height), Point(left + labelSize.width, top + baseLine), Scalar::all(255), FILLED);
-	putText(frame, label, Point(left, top), FONT_HERSHEY_SIMPLEX, 0.5, Scalar());
+	cv::rectangle(frame, cv::Point(left, top - labelSize.height), cv::Point(left + labelSize.width, top + baseLine), cv::Scalar::all(255), FILLED);
+	putText(frame, label, cv::Point(left, top), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar());
 }
 
 void callback(int pos, void*)

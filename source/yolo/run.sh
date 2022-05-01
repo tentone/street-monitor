@@ -1,5 +1,7 @@
 #!/bin/bash
 
-make .
+rm ./yolo
 
-./yolo --input "../../dataset/highway-traffic.mp4"  --model ../../models/yolo/yolov3-tiny.weights --config ../../models/yolo/yolov3-tiny.cfg
+make
+
+./yolo

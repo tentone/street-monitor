@@ -7,4 +7,4 @@ rm ./speed-camera
 cmake .
 make -j4
 
-./speed-camera
+./speed-camera "./dataset/highway-traffic.mp4"
