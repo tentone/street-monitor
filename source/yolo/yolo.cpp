@@ -6,18 +6,6 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
-#if defined(CV_CXX11) && defined(HAVE_THREADS)
-	#define USE_THREADS 1
-#endif
-
-#ifdef USE_THREADS
-	#include <mutex>
-	#include <thread>
-	#include <queue>
-#endif
-
-#include "common.hpp"
-
 std::string keys =
 	"{ help  h     | | Print help message. }"
 	"{ @alias      | | An alias name of model to extract preprocessing parameters from models.yml file. }"
@@ -60,66 +48,12 @@ void drawPred(int classId, float conf, int left, int top, int right, int bottom,
 
 void callback(int pos, void* userdata);
 
-#ifdef USE_THREADS
-template <typename T>
-class QueueFPS : public std::queue<T>
-{
-public:
-	QueueFPS() : counter(0) {}
-
-	void push(const T& entry)
-	{
-		std::lock_guard<std::mutex> lock(mutex);
-
-		std::queue<T>::push(entry);
-		counter += 1;
-		if (counter == 1)
-		{
-			// Start counting from a second frame (warmup).
-			tm.reset();
-			tm.start();
-		}
-	}
-
-	T get()
-	{
-		std::lock_guard<std::mutex> lock(mutex);
-		T entry = this->front();
-		this->pop();
-		return entry;
-	}
-
-	float getFPS()
-	{
-		tm.stop();
-		double fps = counter / tm.getTimeSec();
-		tm.start();
-		return static_cast<float>(fps);
-	}
-
-	void clear()
-	{
-		std::lock_guard<std::mutex> lock(mutex);
-		while (!this->empty())
-			this->pop();
-	}
-
-	unsigned int counter;
-
-private:
-	TickMeter tm;
-	std::mutex mutex;
-};
-#endif  // USE_THREADS
-
 int main(int argc, char** argv)
 {
 	CommandLineParser parser(argc, argv, keys);
 
 	const std::string modelName = parser.get<String>("@alias");
 	const std::string zooFile = parser.get<String>("zoo");
-
-	keys += genPreprocArguments(modelName, zooFile);
 
 	parser = CommandLineParser(argc, argv, keys);
 
@@ -136,7 +70,7 @@ int main(int argc, char** argv)
 	cv::Scalar mean = cv::Scalar(1.0); // parser.get<cv::Scalar>("mean");
 
 	// Indicate that model works with RGB input images instead BGR ones.
-	bool useRGB = true;
+	bool useRGB = false;
 	
 	// Preprocess input image by resizing to a specific width.
 	int inpWidth = 320;
@@ -172,110 +106,9 @@ int main(int argc, char** argv)
 	VideoCapture cap;
 	cap.open("../../dataset/highway-traffic.mp4");
 
-
-#ifdef USE_THREADS
-	bool process = true;
-
-	// Frames capturing thread
-	QueueFPS<cv::Mat> framesQueue;
-	std::thread framesThread([&](){
-		cv::Mat frame;
-		while (process)
-		{
-			cap >> frame;
-			if (!frame.empty())
-				framesQueue.push(frame.clone());
-			else
-				break;
-		}
-	});
-
-	// Frames processing thread
-	QueueFPS<cv::Mat> processedFramesQueue;
-	QueueFPS<std::vector<cv::Mat> > predictionsQueue;
-	std::thread processingThread([&](){
-		std::queue<AsyncArray> futureOutputs;
-		cv::Mat blob;
-		while (process)
-		{
-			// Get a next frame
-			cv::Mat frame;
-			{
-				if (!framesQueue.empty())
-				{
-					frame = framesQueue.get();
-					if (asyncNumReq)
-					{
-						if (futureOutputs.size() == asyncNumReq)
-							frame = cv::Mat();
-					}
-					else
-						framesQueue.clear();  // Skip the rest of frames
-				}
-			}
-
-			// Process the frame
-			if (!frame.empty())
-			{
-				preprocess(frame, net, Size(inpWidth, inpHeight), scale, mean, swapRB);
-				processedFramesQueue.push(frame);
-
-				if (asyncNumReq)
-				{
-					futureOutputs.push(net.forwardAsync());
-				}
-				else
-				{
-					std::vector<cv::Mat> outs;
-					net.forward(outs, outNames);
-					predictionsQueue.push(outs);
-				}
-			}
-
-			while (!futureOutputs.empty() &&
-				   futureOutputs.front().wait_for(std::chrono::seconds(0)))
-			{
-				AsyncArray async_out = futureOutputs.front();
-				futureOutputs.pop();
-				cv::Mat out;
-				async_out.get(out);
-				predictionsQueue.push({out});
-			}
-		}
-	});
-
-	// Postprocessing and rendering loop
-	while (waitKey(1) < 0)
-	{
-		if (predictionsQueue.empty())
-			continue;
-
-		std::vector<cv::Mat> outs = predictionsQueue.get();
-		cv::Mat frame = processedFramesQueue.get();
-
-		postprocess(frame, outs, net, backend);
-
-		if (predictionsQueue.counter > 1)
-		{
-			std::string label = format("Camera: %.2f FPS", framesQueue.getFPS());
-			putText(frame, label, cv::Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
-
-			label = format("Network: %.2f FPS", predictionsQueue.getFPS());
-			putText(frame, label, cv::Point(0, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
-
-			label = format("Skipped frames: %d", framesQueue.counter - predictionsQueue.counter);
-			putText(frame, label, cv::Point(0, 45), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
-		}
-		cv::imshow("YOLO", frame);
-	}
-
-	process = false;
-	framesThread.join();
-	processingThread.join();
-
-#else  // USE_THREADS
-	if (asyncNumReq)
+	if (asyncNumReq) {
 		CV_Error(Error::StsNotImplemented, "Asynchronous forward is supported only with Inference Engine backend.");
+	}
 
 	// Process frames.
 	cv::Mat frame, blob;
@@ -304,14 +137,14 @@ int main(int argc, char** argv)
 
 		cv::imshow("YOLO", frame);
 	}
-#endif  // USE_THREADS
+
 	return 0;
 }
 
-inline void preprocess(const cv::Mat& frame, dnn::Net& net, Size inpSize, float scale,
-					   const cv::Scalar& mean, bool swapRB)
+void preprocess(const cv::Mat& frame, dnn::Net& net, Size inpSize, float scale, const cv::Scalar& mean, bool swapRB)
 {
 	static cv::Mat blob;
+
 	// Create a 4D blob from a frame.
 	if (inpSize.width <= 0) inpSize.width = frame.cols;
 	if (inpSize.height <= 0) inpSize.height = frame.rows;
@@ -379,9 +212,7 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, Net& net, int
 	{
 		for (size_t i = 0; i < outs.size(); ++i)
 		{
-			// Network produces output blob with a shape NxC where N is a number of
-			// detected objects and C is a number of classes + 4 where the first 4
-			// numbers are [center_x, center_y, width, height]
+			// Network produces output blob with a shape NxC where N is a number of detected objects and C is a number of classes + 4 where the first 4 numbers are [center_x, center_y, width, height]
 			float* data = (float*)outs[i].data;
 			for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
 			{
