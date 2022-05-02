@@ -28,16 +28,16 @@ class YOLODetector {
 		 * @param source 
 		 * @return cv::Mat 
 		 */
-		cv::Mat formatImage(const cv::Mat &source) {
-		
-			// put the image in a square big enough
+		cv::Mat formatImage(const cv::Mat &source)
+		{
+			// Put the image in a square big enough
 			int col = source.cols;
 			int row = source.rows;
 			int _max = MAX(col, row);
 			cv::Mat resized = cv::Mat::zeros(_max, _max, CV_8UC3);
 			source.copyTo(resized(cv::Rect(0, 0, col, row)));
 			
-			// resize to 640x640, normalize to [0,1[ and swap Red and Blue channels
+			// Resize to size, normalize to [0,1[ and swap Red and Blue channels
 			cv::Mat result;
 			cv::dnn::blobFromImage(source, result, 1./255., cv::Size(INPUT_WIDTH, INPUT_HEIGHT), cv::Scalar(), true, false);
 		
@@ -48,9 +48,12 @@ class YOLODetector {
 		 * @brief Obtain a preditions for an image, the image should be first preformated.
 		 * 
 		 */
-		void predict() {
+		cv::Mat predict()
+		{
 			std::vector<cv::Mat> predictions;
 			net.forward(predictions, net.getUnconnectedOutLayersNames());
-			const cv::Mat &output = predictions[0];
+			cv::Mat &output = predictions[0];
+
+			return output;
 		}
 };

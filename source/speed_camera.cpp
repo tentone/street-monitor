@@ -14,6 +14,7 @@
 #include "optical_flow.cpp"
 #include "haar_detector.cpp"
 #include "background_subtractor.cpp"
+#include "features.cpp"
 
 class SpeedCamera {
 	public:
@@ -31,8 +32,7 @@ class SpeedCamera {
 		void processFrame(cv::Mat *frame) {
 			cv::imshow( "Frame", *frame );
 			
-			// surfFeatures(frame);
-			opticalFlow.dense(frame);
+			// opticalFlow.sparse(frame);
 			haarDetector.detect(frame, "./models/haar/car.xml");
 			backgroundSubtractor.update(frame);
 
@@ -73,26 +73,5 @@ class SpeedCamera {
 
 			// Closes all the frames
 			cv::destroyAllWindows();
-		}
-
-
-		/**
-		 * @brief Calculate and display SURF features for the entire image.
-		 * 
-		 * @param frame Frame to extract features for.
-		 */
-		void surfFeatures(cv::Mat *frame) {
-			// Detect the keypoints using SURF Detector
-			int minHessian = 400;
-			cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create( minHessian );
-			std::vector<cv::KeyPoint> keypoints;
-			detector->detect(*frame, keypoints);
-
-			// Draw keypoints
-			cv::Mat img;
-			cv::drawKeypoints(*frame, keypoints, img);
-
-			// Show detected (drawn) keypoints
-			cv::imshow("SURF", img);
 		}
 };
