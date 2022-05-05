@@ -24,12 +24,19 @@ class SpeedCamera {
 
 		BackgroundSubtractor backgroundSubtractor;
 
+		int frame = 0;
+
 		/**
 		 * @brief Process a frame of the video feed, can be obtained from camera, video file, dataset etc.
 		 * 
 		 * @param fname 
 		 */
 		void processFrame(cv::Mat *frame) {
+			if (frame == 0) {
+				opticalFlow.initialize(frame);
+				return;
+			}
+
 			cv::imshow( "Frame", *frame );
 			
 			// opticalFlow.sparse(frame);
@@ -37,6 +44,39 @@ class SpeedCamera {
 			backgroundSubtractor.update(frame);
 
 			cv::waitKey(1);
+
+			frame++;
+		}
+
+		/**
+		 * @brief Start processing from computer camera.
+		 */
+		void startCamera() {
+			cv::VideoCapture cap(0); 
+
+			if(!cap.isOpened()) {
+				std::cout << "Error opening video stream or file" << std::endl;
+				return;
+			}
+
+			// Processing loop
+			while(1) {
+				cv::Mat frame;
+				cap >> frame;
+
+				// If the frame is empty, break immediately
+				if (frame.empty()) {
+					break;
+				}
+
+				this->processFrame(&frame);           
+			}
+
+			// When everything done, release the video capture object
+			cap.release();
+
+			// Closes all the frames
+			cv::destroyAllWindows();
 		}
 
 		/**
@@ -49,11 +89,6 @@ class SpeedCamera {
 				std::cout << "Error opening video stream or file" << std::endl;
 				return;
 			}
-
-			// First frame
-			cv::Mat frame;
-			cap >> frame;
-			opticalFlow.initialize(&frame);
 
 			// Processing loop
 			while(1) {
