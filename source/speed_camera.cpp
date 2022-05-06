@@ -22,6 +22,8 @@ class SpeedCamera {
 
 		HaarDetector haarDetector;
 
+		YOLODetector yoloDetector = YOLODetector("../models/yolo/yolov5n.pt");
+
 		BackgroundSubtractor backgroundSubtractor;
 
 		int frame = 0;

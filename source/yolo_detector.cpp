@@ -19,7 +19,7 @@ class YOLODetector {
 		 */
 		YOLODetector(std::string model)
 		{
-			net = cv::dnn::readNet(model); // "../models/yolo/yolov5n.pt");
+			net = cv::dnn::readNet(model);
 		}
 
 		/**
