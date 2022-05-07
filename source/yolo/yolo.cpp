@@ -91,10 +91,10 @@ int main(int argc, char** argv)
 	std::string input = "../../dataset/highway-traffic.mp4";
 
 	// Load a model.
-	Net net = readNet(modelPath, configPath, parser.get<String>("framework"));
-	int backend = parser.get<int>("backend");
+	Net net = readNet(modelPath, configPath);
+	int backend = 0;
 	net.setPreferableBackend(backend);
-	net.setPreferableTarget(parser.get<int>("target"));
+	net.setPreferableTarget(0);
 	std::vector<String> outNames = net.getUnconnectedOutLayersNames();
 
 	// Create a window
