@@ -3,19 +3,6 @@
 
 #include <opencv2/opencv.hpp>
 
-// Constants.
-const float INPUT_WIDTH = 640.0;
-const float INPUT_HEIGHT = 640.0;
-const float SCORE_THRESHOLD = 0.5;
-const float NMS_THRESHOLD = 0.45;
-const float CONFIDENCE_THRESHOLD = 0.7;
-
-// Text parameters.
-const float FONT_SCALE = 0.7;
-const int FONT_FACE = cv::FONT_HERSHEY_SIMPLEX;
-const int THICKNESS = 1;
-
-// Colors.
 cv::Scalar BLACK = cv::Scalar(0,0,0);
 cv::Scalar BLUE = cv::Scalar(255, 178, 50);
 cv::Scalar YELLOW = cv::Scalar(0, 255, 255);
@@ -23,16 +10,26 @@ cv::Scalar RED = cv::Scalar(0,0,255);
 
 class YOLODetector {
 	public:
+		// Text parameters.
+		const float FONT_SCALE = 0.7;
+		const int FONT_FACE = cv::FONT_HERSHEY_SIMPLEX;
+		const int THICKNESS = 1;
+
+		const float INPUT_WIDTH = 640.0;
+		const float INPUT_HEIGHT = 640.0;
+		const float SCORE_THRESHOLD = 0.5;
+		const float NMS_THRESHOLD = 0.45;
+		const float CONFIDENCE_THRESHOLD = 0.5;
+
 		/**
 		 * @brief DNN model used to detect objects.
 		 */
 		cv::dnn::Net net;
 		
-
 		/**
 		 * @brief List of classes that the DNN can classify.
 		 */
-		std::vector<std::string> class_list;
+		std::vector<std::string> classes;
 
 		/**
 		 * @brief Initialize the detector with a specific DNN model.
@@ -40,7 +37,8 @@ class YOLODetector {
 		 * @param model Path to the DNN model to be used.
 		 */
 		YOLODetector(std::string modelf, std::string classf)
-		{
+		{	
+			// Load classes
 			this->load_classes(classf);
 
 			// Load model.
@@ -56,11 +54,10 @@ class YOLODetector {
 		std::vector<cv::Mat> process_frame(cv::Mat *frame) {
 
 			std::vector<cv::Mat> detections;
-			detections = this->detect(*frame, net);
+			detections = this->detect(*frame);
 
 			cv::Mat clone = frame->clone();
-
-			cv::Mat img = this->draw(clone, detections, this->class_list);
+			cv::Mat img = this->draw_predictions(clone, detections);
 
 			//The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
 			// std::vector<double> layersTimes;
@@ -75,6 +72,11 @@ class YOLODetector {
 		}
 
 
+		/**
+		 * @brief Load list of classes from file, line by line.
+		 * 
+		 * @param fname File to load classes from
+		 */
 		void load_classes(std::string fname) {
 			// Load class list.
 			std::ifstream ifs(fname);
@@ -83,47 +85,70 @@ class YOLODetector {
 			std::string line;
 			while (getline(ifs, line))
 			{
-				this->class_list.push_back(line);
+				this->classes.push_back(line);
 			}
 		}
 
-		// Draw the predicted bounding box.
-		void draw_label(cv::Mat& frame, std::string label, int left, int top)
+		/**
+		 * @brief  Draw one predicted bounding box alongside with label.
+		 * 
+		 * @param frame Frame to draw the box in
+		 * @param label Label of the box to draw.
+		 * @param x X coordinate (left corner)
+		 * @param y Y coordinate (top corner)
+		 */
+		void draw_box(cv::Mat& frame, std::string label, int x, int y)
 		{
 			// Display the label at the top of the bounding box.
 			int baseLine;
 			cv::Size label_size = cv::getTextSize(label, FONT_FACE, FONT_SCALE, THICKNESS, &baseLine);
-			top = std::max(top, label_size.height);
+
+			// Dont excess the image height
+			y = std::max(y, label_size.height);
 
 			// Top left corner.
-			cv::Point tlc = cv::Point(left, top);
+			cv::Point tlc = cv::Point(x, y);
 
 			// Bottom right corner.
-			cv::Point brc = cv::Point(left + label_size.width, top + label_size.height + baseLine);
+			cv::Point brc = cv::Point(x + label_size.width, y + label_size.height + baseLine);
 
 			// Draw black rectangle.
 			cv::rectangle(frame, tlc, brc, BLACK, cv::FILLED);
 
 			// Put the label on the black rectangle.
-			cv::putText(frame, label, cv::Point(left, top + label_size.height), FONT_FACE, FONT_SCALE, YELLOW, THICKNESS);
+			cv::putText(frame, label, cv::Point(x, y + label_size.height), FONT_FACE, FONT_SCALE, YELLOW, THICKNESS);
 		}
 
-		std::vector<cv::Mat> detect(cv::Mat &frame, cv::dnn::Net &net)
+		/**
+		 * @brief Detect object in an image using the loaded model.
+		 * 
+		 * @param frame Frame to detect object in.
+		 * @return std::vector<cv::Mat> 
+		 */
+		std::vector<cv::Mat> detect(cv::Mat &frame)
 		{
 			// Convert to blob.
 			cv::Mat blob;
 			cv::dnn::blobFromImage(frame, blob, 1./255., cv::Size(INPUT_WIDTH, INPUT_HEIGHT), cv::Scalar(), true, false);
 
-			net.setInput(blob);
+			this->net.setInput(blob);
 
 			// Forward propagate.
 			std::vector<cv::Mat> outputs;
-			net.forward(outputs, net.getUnconnectedOutLayersNames());
+			this->net.forward(outputs, this->net.getUnconnectedOutLayersNames());
 
 			return outputs;
 		}
 
-		cv::Mat draw(cv::Mat &frame, std::vector<cv::Mat> &outputs, const std::vector<std::string> &class_name) 
+		/**
+		 * @brief Draw the predictions obtained from the model into the image for debug.
+		 * 
+		 * @param frame Frame to draw the predictions on.
+		 * @param outputs 
+		 * @param class_name 
+		 * @return cv::Mat 
+		 */
+		cv::Mat draw_predictions(cv::Mat &frame, std::vector<cv::Mat> &predictions) 
 		{
 			// Initialize std::vectors to hold respective outputs while unwrapping detections.
 			std::vector<int> class_ids;
@@ -134,7 +159,7 @@ class YOLODetector {
 			float x_factor = frame.cols / INPUT_WIDTH;
 			float y_factor = frame.rows / INPUT_HEIGHT;
 
-			float *data = (float *)outputs[0].data;
+			float *data = (float *)predictions[0].data;
 
 			const int dimensions = 85;
 			const int rows = 25200;
@@ -146,8 +171,9 @@ class YOLODetector {
 				if (confidence >= CONFIDENCE_THRESHOLD) 
 				{
 					float * classes_scores = data + 5;
+
 					// Create a 1x85 cv::Mat and store class scores of 80 classes.
-					cv::Mat scores(1, class_name.size(), CV_32FC1, classes_scores);
+					cv::Mat scores(1, this->classes.size(), CV_32FC1, classes_scores);
 
 					// Perform minMaxLoc and acquire index of best class score.
 					cv::Point class_id;
@@ -201,10 +227,10 @@ class YOLODetector {
 
 				// Get the label for the class name and its confidence.
 				std::string label = cv::format("%.2f", confidences[idx]);
-				label = class_name[class_ids[idx]] + ":" + label;
+				label = this->classes[class_ids[idx]] + ":" + label;
 				
 				// Draw class labels.
-				draw_label(frame, label, left, top);
+				draw_box(frame, label, left, top);
 			}
 
 			return frame;

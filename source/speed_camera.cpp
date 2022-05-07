@@ -22,7 +22,7 @@ class SpeedCamera {
 
 		HaarDetector haarDetector;
 
-		YOLODetector yoloDetector = YOLODetector("./models/yolo/yolov5m.onnx", "./models/yolo/yolo.names");
+		YOLODetector yoloDetector = YOLODetector("./models/yolo/yolov5n.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor backgroundSubtractor;
 
