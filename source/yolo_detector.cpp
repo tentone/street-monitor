@@ -17,9 +17,9 @@ class YOLODetector {
 		 * 
 		 * @param model Path to the DNN model to be used.
 		 */
-		YOLODetector(std::string model)
+		YOLODetector(std::string model, std::string config)
 		{
-			net = cv::dnn::readNet(model);
+			net = cv::dnn::readNet(model, config);
 		}
 
 		/**
