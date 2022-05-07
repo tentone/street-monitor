@@ -8,8 +8,7 @@
 class HaarDetector {
     public:
         bool debug = true;
-
-
+		
         /**
 		 * @brief Detect cars using a haar cascade model. The bouding boxes of the cars found is returned.
 		 * 

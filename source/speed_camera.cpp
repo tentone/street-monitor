@@ -22,7 +22,7 @@ class SpeedCamera {
 
 		HaarDetector haarDetector;
 
-		YOLODetector yoloDetector = YOLODetector("../models/yolo/yolov5n.pt");
+		YOLODetector yoloDetector = YOLODetector("./models/yolo/yolov5m.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor backgroundSubtractor;
 
@@ -42,8 +42,9 @@ class SpeedCamera {
 			cv::imshow( "Frame", *frame );
 			
 			// opticalFlow.sparse(frame);
-			haarDetector.detect(frame, "./models/haar/car.xml");
+			// haarDetector.detect(frame, "./models/haar/car.xml");
 			backgroundSubtractor.update(frame);
+			yoloDetector.process_frame(frame);
 
 			cv::waitKey(1);
 

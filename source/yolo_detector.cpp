@@ -53,21 +53,25 @@ class YOLODetector {
 		 * 
 		 * @param frame 
 		 */
-		void process_frame(cv::Mat& frame) {
+		std::vector<cv::Mat> process_frame(cv::Mat *frame) {
 
 			std::vector<cv::Mat> detections;
-			detections = this->detect(frame, net);
+			detections = this->detect(*frame, net);
 
-			cv::Mat clone = frame.clone();
+			cv::Mat clone = frame->clone();
 
 			cv::Mat img = this->draw(clone, detections, this->class_list);
 
 			//The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
-			std::vector<double> layersTimes;
-			double freq = cv::getTickFrequency() / 1000;
-			double t = net.getPerfProfile(layersTimes) / freq;
-			std::string label = cv::format("Inference time : %.2f ms", t);
-			cv::putText(img, label, cv::Point(20, 40), FONT_FACE, FONT_SCALE, RED);
+			// std::vector<double> layersTimes;
+			// double freq = cv::getTickFrequency() / 1000;
+			// double t = net.getPerfProfile(layersTimes) / freq;
+			// std::string label = cv::format("Inference time : %.2f ms", t);
+			// cv::putText(img, label, cv::Point(20, 40), FONT_FACE, FONT_SCALE, RED);
+
+			cv::imshow("YOLO", clone);
+
+			return detections;
 		}
 
 
