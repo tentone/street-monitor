@@ -4,22 +4,32 @@
 #include <opencv2/opencv.hpp>
 
 cv::Scalar BLACK = cv::Scalar(0,0,0);
-cv::Scalar BLUE = cv::Scalar(255, 178, 50);
-cv::Scalar YELLOW = cv::Scalar(0, 255, 255);
+cv::Scalar BLUE = cv::Scalar(255,0,0);
+cv::Scalar YELLOW = cv::Scalar(0,255, 255);
 cv::Scalar RED = cv::Scalar(0,0,255);
 
 class YOLODetector {
 	public:
-		// Text parameters.
-		const float FONT_SCALE = 0.7;
-		const int FONT_FACE = cv::FONT_HERSHEY_SIMPLEX;
-		const int THICKNESS = 1;
+		bool debug = true;
 
+		/**
+		 * @brief Width of the image to be processed. The image is resized to match this size.
+		 */
 		const float INPUT_WIDTH = 640.0;
+		
+		/**
+		 * @brief Height of the image to be processed. The image is resized to match this size.
+		 */
 		const float INPUT_HEIGHT = 640.0;
+
 		const float SCORE_THRESHOLD = 0.5;
+		
 		const float NMS_THRESHOLD = 0.45;
-		const float CONFIDENCE_THRESHOLD = 0.5;
+
+		/**
+		 * @brief Confidence threshold to consider the object detected.
+		 */
+		const float CONFIDENCE_THRESHOLD = 0.55;
 
 		/**
 		 * @brief DNN model used to detect objects.
@@ -39,7 +49,7 @@ class YOLODetector {
 		YOLODetector(std::string modelf, std::string classf)
 		{	
 			// Load classes
-			this->load_classes(classf);
+			this->loadClasses(classf);
 
 			// Load model.
 			this->net = cv::dnn::readNet(modelf); 
@@ -51,20 +61,20 @@ class YOLODetector {
 		 * 
 		 * @param frame 
 		 */
-		std::vector<cv::Mat> process_frame(cv::Mat *frame) {
+		std::vector<cv::Mat> processFrame(cv::Mat *frame) {
 
 			std::vector<cv::Mat> detections;
 			detections = this->detect(*frame);
 
 			cv::Mat clone = frame->clone();
-			cv::Mat img = this->draw_predictions(clone, detections);
+			cv::Mat img = this->drawPredictions(clone, detections);
 
-			//The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
+			// The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
 			// std::vector<double> layersTimes;
 			// double freq = cv::getTickFrequency() / 1000;
 			// double t = net.getPerfProfile(layersTimes) / freq;
 			// std::string label = cv::format("Inference time : %.2f ms", t);
-			// cv::putText(img, label, cv::Point(20, 40), FONT_FACE, FONT_SCALE, RED);
+			// cv::putText(img, label, cv::Point(20, 40), cv::FONT_HERSHEY_SIMPLEX, 0.7, RED);
 
 			cv::imshow("YOLO", clone);
 
@@ -77,7 +87,7 @@ class YOLODetector {
 		 * 
 		 * @param fname File to load classes from
 		 */
-		void load_classes(std::string fname) {
+		void loadClasses(std::string fname) {
 			// Load class list.
 			std::ifstream ifs(fname);
 			
@@ -97,11 +107,11 @@ class YOLODetector {
 		 * @param x X coordinate (left corner)
 		 * @param y Y coordinate (top corner)
 		 */
-		void draw_box(cv::Mat& frame, std::string label, int x, int y)
+		void drawBox(cv::Mat& frame, std::string label, int x, int y)
 		{
 			// Display the label at the top of the bounding box.
 			int baseLine;
-			cv::Size label_size = cv::getTextSize(label, FONT_FACE, FONT_SCALE, THICKNESS, &baseLine);
+			cv::Size label_size = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.7, 1, &baseLine);
 
 			// Dont excess the image height
 			y = std::max(y, label_size.height);
@@ -116,7 +126,7 @@ class YOLODetector {
 			cv::rectangle(frame, tlc, brc, BLACK, cv::FILLED);
 
 			// Put the label on the black rectangle.
-			cv::putText(frame, label, cv::Point(x, y + label_size.height), FONT_FACE, FONT_SCALE, YELLOW, THICKNESS);
+			cv::putText(frame, label, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.7, YELLOW, 1);
 		}
 
 		/**
@@ -134,10 +144,12 @@ class YOLODetector {
 			this->net.setInput(blob);
 
 			// Forward propagate.
-			std::vector<cv::Mat> outputs;
-			this->net.forward(outputs, this->net.getUnconnectedOutLayersNames());
+			std::vector<cv::Mat> predictions;
+			this->net.forward(predictions, this->net.getUnconnectedOutLayersNames());
 
-			return outputs;
+
+
+			return predictions;
 		}
 
 		/**
@@ -148,7 +160,7 @@ class YOLODetector {
 		 * @param class_name 
 		 * @return cv::Mat 
 		 */
-		cv::Mat draw_predictions(cv::Mat &frame, std::vector<cv::Mat> &predictions) 
+		cv::Mat drawPredictions(cv::Mat &frame, std::vector<cv::Mat> &predictions) 
 		{
 			// Initialize std::vectors to hold respective outputs while unwrapping detections.
 			std::vector<int> class_ids;
@@ -223,14 +235,14 @@ class YOLODetector {
 				int height = box.height;
 
 				// Draw bounding box.
-				cv::rectangle(frame, cv::Point(left, top), cv::Point(left + width, top + height), BLUE, 3*THICKNESS);
+				cv::rectangle(frame, cv::Point(left, top), cv::Point(left + width, top + height), BLUE, 3*1);
 
 				// Get the label for the class name and its confidence.
 				std::string label = cv::format("%.2f", confidences[idx]);
 				label = this->classes[class_ids[idx]] + ":" + label;
 				
 				// Draw class labels.
-				draw_box(frame, label, left, top);
+				drawBox(frame, label, left, top);
 			}
 
 			return frame;

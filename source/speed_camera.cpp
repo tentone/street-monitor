@@ -44,7 +44,7 @@ class SpeedCamera {
 			// opticalFlow.sparse(frame);
 			// haarDetector.detect(frame, "./models/haar/car.xml");
 			backgroundSubtractor.update(frame);
-			yoloDetector.process_frame(frame);
+			yoloDetector.processFrame(frame);
 
 			cv::waitKey(1);
 
