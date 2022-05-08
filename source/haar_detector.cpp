@@ -36,7 +36,7 @@ class HaarDetector {
 			std::vector<cv::Rect> features;
 
 			// Detect the features in the normalized, gray-scale version of the image.
-			classifier.detectMultiScale(grayscale, features, 1.1, 5, cv::CASCADE_SCALE_IMAGE, cv::Size(10, 10), cv::Size(300, 300));
+			classifier.detectMultiScale(grayscale, features, 1.1, 3, cv::CASCADE_SCALE_IMAGE, cv::Size(10, 10), cv::Size(300, 300));
 
 			// Debug
             if (debug) {

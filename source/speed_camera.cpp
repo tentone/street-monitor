@@ -39,13 +39,14 @@ class SpeedCamera {
 				return;
 			}
 
-			cv::imshow( "Frame", *frame );
-			
 			// optical_flow.dense(frame);
 			car_haar.detect(frame);
-			background_detector.update(frame);
-			yolo.detect(frame);
+			cv::Mat mov = background_detector.update(frame);
+			background_detector.segmentBlobs(&mov);
 
+			// yolo.detect(frame);
+
+			cv::imshow("Frame", *frame);
 			cv::waitKey(1);
 
 			frame++;
