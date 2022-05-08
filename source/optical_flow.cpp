@@ -10,6 +10,7 @@
 #include <opencv2/video.hpp>
 #include <opencv2/objdetect.hpp>
 
+
 class OpticalFlow {
     public:
         // Dense vars
@@ -17,7 +18,7 @@ class OpticalFlow {
 
         // Sparse Vars
         cv::Mat sparse_flow_frame, sparse_flow_gray;
-        std::vector<cv::Point2f> p0, p1;
+        std::vector<cv::Point2f> parse_points_prev, parse_points_next;
         cv::Mat sparse_mask;
 
         // Random colors for debug
@@ -39,7 +40,7 @@ class OpticalFlow {
 
             // Sparse Vars
             cv::cvtColor(*frame, sparse_flow_gray, cv::COLOR_BGR2GRAY);
-            cv::goodFeaturesToTrack(sparse_flow_gray, p0, 100, 0.3, 7, cv::Mat(), 7, false, 0.04);
+            cv::goodFeaturesToTrack(sparse_flow_gray, parse_points_prev, 100, 0.3, 7, cv::Mat(), 7, false, 0.04);
             sparse_mask = cv::Mat::zeros(sparse_flow_frame.size(), sparse_flow_frame.type());
 
             // Generate random colors for debug
@@ -58,7 +59,6 @@ class OpticalFlow {
         void sparse(cv::Mat *frame)
         {   
             cv::Mat frame_gray;
-
             cv::cvtColor(*frame, frame_gray, cv::COLOR_BGR2GRAY);
 
             // Calculate optical flow
@@ -67,18 +67,18 @@ class OpticalFlow {
             cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) + (cv::TermCriteria::EPS), 10, 0.03);
 
             // Lucas-kanade optical flow
-            cv::calcOpticalFlowPyrLK(sparse_flow_gray, frame_gray, p0, p1, status, err, cv::Size(15,15), 2, criteria);
+            cv::calcOpticalFlowPyrLK(sparse_flow_gray, frame_gray, parse_points_prev, parse_points_next, status, err, cv::Size(15, 15), 2, criteria);
 
-            std::vector<cv::Point2f> good_new;
-            for(uint i = 0; i < p0.size(); i++)
+            std::vector<cv::Point2f> track_points;
+            for(uint i = 0; i < parse_points_prev.size(); i++)
             {
                 // Select good points
                 if(status[i] == 1) {
-                    good_new.push_back(p1[i]);
+                    track_points.push_back(parse_points_next[i]);
 
                     // Draw the tracks
-                    cv::line(sparse_mask,p1[i], p0[i], colors[i], 2);
-                    cv::circle(*frame, p1[i], 5, colors[i], -1);
+                    cv::line(sparse_mask, parse_points_next[i], parse_points_prev[i], colors[i], 2);
+                    cv::circle(*frame, parse_points_next[i], 5, colors[i], -1);
                 }
             }
 
@@ -90,7 +90,7 @@ class OpticalFlow {
 
             // Now update the previous frame and previous points
             sparse_flow_gray = frame_gray.clone();
-            p0 = good_new;
+            parse_points_prev = track_points;
         }
 
         /**
@@ -98,13 +98,13 @@ class OpticalFlow {
          * 
          * @param frame New frame to calculate optical flow.
          */
-        cv::Mat dense(cv::Mat *frame)
+        cv::Mat dense_farneback(cv::Mat *frame, int mode)
         {   
             cv::Mat next;
-
             cv::cvtColor(*frame, next, cv::COLOR_BGR2GRAY);
             cv::Mat flow(dense_flow_frame.size(), CV_32FC2);
             cv::calcOpticalFlowFarneback(dense_flow_frame, next, flow, 0.5, 3, 15, 3, 3, 3.0, 0);
+
 
             if (debug) {
                 // Visualization

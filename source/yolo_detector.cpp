@@ -70,8 +70,8 @@ class YOLODetector {
 		 * 
 		 * @param frame Frame to be processed
 		 */
-		std::vector<cv::Mat> processFrame(cv::Mat *frame) {
-			std::vector<cv::Mat> detections = this->detect(*frame);
+		std::vector<cv::Mat> detect(cv::Mat *frame) {
+			std::vector<cv::Mat> detections = this->classify(*frame);
 
 			if (this->debug) {
 				cv::Mat clone = frame->clone();
@@ -145,7 +145,7 @@ class YOLODetector {
 		 * @param frame Frame to detect object in.
 		 * @return std::vector<cv::Mat> 
 		 */
-		std::vector<cv::Mat> detect(cv::Mat &frame)
+		std::vector<cv::Mat> classify(cv::Mat &frame)
 		{
 			// Convert to blob.
 			cv::Mat blob;

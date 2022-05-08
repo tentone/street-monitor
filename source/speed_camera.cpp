@@ -18,13 +18,13 @@
 
 class SpeedCamera {
 	public:
-		OpticalFlow opticalFlow;
+		OpticalFlow optical_flow;
 
-		HaarDetector haarDetector;
+		HaarDetector car_haar = HaarDetector("./models/haar/car.xml");
 
-		YOLODetector yoloDetector = YOLODetector("./models/yolo/yolov5n.onnx", "./models/yolo/yolo.names");
+		YOLODetector yolo = YOLODetector("./models/yolo/yolov5n.onnx", "./models/yolo/yolo.names");
 
-		BackgroundSubtractor backgroundSubtractor;
+		BackgroundSubtractor background_detector;
 
 		int frame = 0;
 
@@ -35,16 +35,16 @@ class SpeedCamera {
 		 */
 		void processFrame(cv::Mat *frame) {
 			if (frame == 0) {
-				opticalFlow.initialize(frame);
+				optical_flow.initialize(frame);
 				return;
 			}
 
 			cv::imshow( "Frame", *frame );
 			
-			// opticalFlow.sparse(frame);
-			// haarDetector.detect(frame, "./models/haar/car.xml");
-			backgroundSubtractor.update(frame);
-			yoloDetector.processFrame(frame);
+			// optical_flow.dense(frame);
+			car_haar.detect(frame);
+			background_detector.update(frame);
+			yolo.detect(frame);
 
 			cv::waitKey(1);
 
