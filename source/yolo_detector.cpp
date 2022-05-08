@@ -10,6 +10,9 @@ cv::Scalar RED = cv::Scalar(0,0,255);
 
 class YOLODetector {
 	public:
+		/**
+		 * @brief Flag to display debug information.
+		 */
 		bool debug = true;
 
 		/**
@@ -22,12 +25,18 @@ class YOLODetector {
 		 */
 		const float INPUT_HEIGHT = 640.0;
 
-		const float SCORE_THRESHOLD = 0.5;
-		
+		/**
+		 * @brief Threshold used in non maximum suppression.
+		 */
 		const float NMS_THRESHOLD = 0.45;
 
 		/**
-		 * @brief Confidence threshold to consider the object detected.
+		 * @brief Score threshold to consider that the object is of a specific object class. (e.g. confidence that is a car).
+		 */
+		const float SCORE_THRESHOLD = 0.5;
+
+		/**
+		 * @brief Confidence threshold to consider the object detected. Confidence that those pixels are a object.
 		 */
 		const float CONFIDENCE_THRESHOLD = 0.55;
 
@@ -59,24 +68,25 @@ class YOLODetector {
 		/**
 		 * @brief Process a frame to detect objects using the YOLO V5 model.
 		 * 
-		 * @param frame 
+		 * @param frame Frame to be processed
 		 */
 		std::vector<cv::Mat> processFrame(cv::Mat *frame) {
+			std::vector<cv::Mat> detections = this->detect(*frame);
 
-			std::vector<cv::Mat> detections;
-			detections = this->detect(*frame);
+			if (this->debug) {
+				cv::Mat clone = frame->clone();
+				cv::Mat img = this->drawPredictions(clone, detections);
 
-			cv::Mat clone = frame->clone();
-			cv::Mat img = this->drawPredictions(clone, detections);
+				// The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
+				std::vector<double> layersTimes;
+				double freq = cv::getTickFrequency() / 1000;
+				double t = net.getPerfProfile(layersTimes) / freq;
+				std::string label = cv::format("Time: %.2f ms", t);
+				cv::putText(img, label, cv::Point(20, 40), cv::FONT_HERSHEY_SIMPLEX, 0.7, RED);
 
-			// The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
-			// std::vector<double> layersTimes;
-			// double freq = cv::getTickFrequency() / 1000;
-			// double t = net.getPerfProfile(layersTimes) / freq;
-			// std::string label = cv::format("Inference time : %.2f ms", t);
-			// cv::putText(img, label, cv::Point(20, 40), cv::FONT_HERSHEY_SIMPLEX, 0.7, RED);
+				cv::imshow("YOLO", clone);
+			}
 
-			cv::imshow("YOLO", clone);
 
 			return detections;
 		}
@@ -141,13 +151,12 @@ class YOLODetector {
 			cv::Mat blob;
 			cv::dnn::blobFromImage(frame, blob, 1./255., cv::Size(INPUT_WIDTH, INPUT_HEIGHT), cv::Scalar(), true, false);
 
+			// Network input
 			this->net.setInput(blob);
 
 			// Forward propagate.
 			std::vector<cv::Mat> predictions;
 			this->net.forward(predictions, this->net.getUnconnectedOutLayersNames());
-
-
 
 			return predictions;
 		}
@@ -175,10 +184,12 @@ class YOLODetector {
 
 			const int dimensions = 85;
 			const int rows = 25200;
+
 			// Iterate through 25200 detections.
 			for (int i = 0; i < rows; ++i) 
 			{
 				float confidence = data[4];
+
 				// Discard bad detections and continue.
 				if (confidence >= CONFIDENCE_THRESHOLD) 
 				{
@@ -224,6 +235,7 @@ class YOLODetector {
 			std::vector<int> indices;
 
 			cv::dnn::NMSBoxes(boxes, confidences, SCORE_THRESHOLD, NMS_THRESHOLD, indices);
+
 			for (int i = 0; i < indices.size(); i++) 
 			{
 				int idx = indices[i];

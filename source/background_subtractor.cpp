@@ -5,13 +5,16 @@
 
 class BackgroundSubtractor {
     public:
+		/**
+		 * @brief Flag to display debug information.
+		 */
 		bool debug = true;
 
         /**
          * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
          */
-		//cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(500, 400, true);
-        cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(500, 16, true);
+		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(500, 400, true);
+        //cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(500, 16, true);
 		
 		/**
 		 * @brief Perform background subtraction and return binary mask of moving objects. Background model is updated based on the last n frames.
@@ -32,9 +35,9 @@ class BackgroundSubtractor {
 			cv::erode(mask, mask, element);
 			cv::dilate(mask, mask, element);
 
+        	// Show the current frame and the fg masks
             if(debug) {
-                // Show the current frame and the fg masks
-                cv::imshow("Background Sub", mask);
+                cv::imshow("Background-Sub", mask);
             }
 
             return mask;

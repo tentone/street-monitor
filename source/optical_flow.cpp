@@ -13,12 +13,14 @@
 class OpticalFlow {
     public:
         // Dense vars
-        cv::Mat opticalFlowFrame;
+        cv::Mat dense_flow_frame;
 
         // Sparse Vars
-        cv::Mat old_frame, old_gray;
+        cv::Mat sparse_flow_frame, sparse_flow_gray;
         std::vector<cv::Point2f> p0, p1;
-        cv::Mat mask;
+        cv::Mat sparse_mask;
+
+        // Random colors for debug
         std::vector<cv::Scalar> colors;
 
         /**
@@ -33,13 +35,14 @@ class OpticalFlow {
          */
         void initialize(cv::Mat *frame) {
             // Dense vars
-			cv::cvtColor(*frame, opticalFlowFrame, cv::COLOR_BGR2GRAY);
+			cv::cvtColor(*frame, dense_flow_frame, cv::COLOR_BGR2GRAY);
 
             // Sparse Vars
-            cv::cvtColor(*frame, old_gray, cv::COLOR_BGR2GRAY);
-            cv::goodFeaturesToTrack(old_gray, p0, 100, 0.3, 7, cv::Mat(), 7, false, 0.04);
-            mask = cv::Mat::zeros(old_frame.size(), old_frame.type());
+            cv::cvtColor(*frame, sparse_flow_gray, cv::COLOR_BGR2GRAY);
+            cv::goodFeaturesToTrack(sparse_flow_gray, p0, 100, 0.3, 7, cv::Mat(), 7, false, 0.04);
+            sparse_mask = cv::Mat::zeros(sparse_flow_frame.size(), sparse_flow_frame.type());
 
+            // Generate random colors for debug
             cv::RNG rng;
             for(int i = 0; i < 100; i++)
             {
@@ -58,12 +61,13 @@ class OpticalFlow {
 
             cv::cvtColor(*frame, frame_gray, cv::COLOR_BGR2GRAY);
 
-            // calculate optical flow
+            // Calculate optical flow
             std::vector<uchar> status;
             std::vector<float> err;
-
             cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) + (cv::TermCriteria::EPS), 10, 0.03);
-            cv::calcOpticalFlowPyrLK(old_gray, frame_gray, p0, p1, status, err, cv::Size(15,15), 2, criteria);
+
+            // Lucas-kanade optical flow
+            cv::calcOpticalFlowPyrLK(sparse_flow_gray, frame_gray, p0, p1, status, err, cv::Size(15,15), 2, criteria);
 
             std::vector<cv::Point2f> good_new;
             for(uint i = 0; i < p0.size(); i++)
@@ -71,25 +75,26 @@ class OpticalFlow {
                 // Select good points
                 if(status[i] == 1) {
                     good_new.push_back(p1[i]);
-                    // draw the tracks
-                    cv::line(mask,p1[i], p0[i], colors[i], 2);
+
+                    // Draw the tracks
+                    cv::line(sparse_mask,p1[i], p0[i], colors[i], 2);
                     cv::circle(*frame, p1[i], 5, colors[i], -1);
                 }
             }
 
             if (debug) {
                 cv::Mat img;
-                cv::add(*frame, mask, img);
+                cv::add(*frame, sparse_mask, img);
                 cv::imshow("Frame", img);
             }
 
             // Now update the previous frame and previous points
-            old_gray = frame_gray.clone();
+            sparse_flow_gray = frame_gray.clone();
             p0 = good_new;
         }
 
         /**
-         * @brief Calculate optical flow for the new frame combined with the previus frame stored in "opticalFlowFrame"
+         * @brief Calculate optical flow for the new frame combined with the previus frame stored in "dense_flow_frame"
          * 
          * @param frame New frame to calculate optical flow.
          */
@@ -98,8 +103,8 @@ class OpticalFlow {
             cv::Mat next;
 
             cv::cvtColor(*frame, next, cv::COLOR_BGR2GRAY);
-            cv::Mat flow(opticalFlowFrame.size(), CV_32FC2);
-            cv::calcOpticalFlowFarneback(opticalFlowFrame, next, flow, 0.5, 3, 15, 3, 3, 3.0, 0);
+            cv::Mat flow(dense_flow_frame.size(), CV_32FC2);
+            cv::calcOpticalFlowFarneback(dense_flow_frame, next, flow, 0.5, 3, 15, 3, 3, 3.0, 0);
 
             if (debug) {
                 // Visualization
@@ -123,7 +128,7 @@ class OpticalFlow {
                 cv::imshow("Optical Flow Dense", bgr);
             }
 
-            opticalFlowFrame = next;
+            dense_flow_frame = next;
 
             return flow;
         }
