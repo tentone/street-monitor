@@ -50,20 +50,32 @@ class BackgroundSubtractor {
             return mask;
 		}
 
-
 		/**
 		 * @brief Segment blobs from binary image. Useful to segment moving objects in an image after background subtraction has been performed.
 		 */
 		std::vector<cv::KeyPoint> segmentBlobs(cv::Mat *frame)
 		{
-			// TODO <CONVERT TO BINARY>
-			
+			// Setup SimpleBlobDetector parameters.
+			cv::SimpleBlobDetector::Params params;
+			params.minThreshold = 200;
+			params.maxThreshold = 255;
+			params.thresholdStep = 5;
+			params.minRepeatability = 1;
+			params.minDistBetweenBlobs = 0;
+			params.filterByArea = true;
+			params.minArea = 200;
+			params.maxArea = 250000;
+			params.filterByCircularity = false;
+			params.filterByConvexity = false;
+			params.filterByInertia = false;
+			params.filterByColor = false;
+
 			// Set up the detector with default parameters.
-			cv::SimpleBlobDetector detector;
+			cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
 
 			// Detect blobs.
 			std::vector<cv::KeyPoint> keypoints;
-			detector.detect(*frame, keypoints);
+			detector->detect(*frame, keypoints);
 
 			if (debug) {
 				// DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures the size of the circle corresponds to the size of blob
