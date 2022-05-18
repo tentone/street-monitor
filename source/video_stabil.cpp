@@ -1,11 +1,3 @@
-/*
-Thanks Nghia Ho for his excellent code.
-And,I modified the smooth step using a simple kalman filter .
-So,It can processes live video streaming.
-modified by chen jia.
-email:chenjia2013@foxmail.com
-*/
-
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cassert>
@@ -17,7 +9,6 @@ using namespace cv;
 
 // This video stablisation smooths the global trajectory using a sliding average window
 
-//const int SMOOTHING_RADIUS = 15; // In frames. The larger the more stable the video, but less reactive to sudden panning
 const int HORIZONTAL_BORDER_CROP = 20; // In pixels. Crops the border to reduce the black borders from stabilisation being too noticeable.
 
 // 1. Get previous to current frame transformation (dx, dy, da) for all frames
@@ -25,7 +16,6 @@ const int HORIZONTAL_BORDER_CROP = 20; // In pixels. Crops the border to reduce 
 // 3. Smooth out the trajectory using an averaging window
 // 4. Generate new set of previous to current transform, such that the trajectory ends up being the same as the smoothed trajectory
 // 5. Apply the new transformation to the video
-
 struct TransformParam
 {
     TransformParam() {}
@@ -76,7 +66,8 @@ struct Trajectory
     double y;
     double a; // angle
 };
-//
+
+
 int main(int argc, char **argv)
 {
 	if(argc < 2) {
@@ -197,10 +188,11 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			//time update£¨prediction£©
+			//time updateï¿½ï¿½predictionï¿½ï¿½
 			X_ = X; //X_(k) = X(k-1);
 			P_ = P+Q; //P_(k) = P(k-1)+Q;
-			// measurement update£¨correction£©
+
+			// measurement updateï¿½ï¿½correctionï¿½ï¿½
 			K = P_/( P_+R ); //gain;K(k) = P_(k)/( P_(k)+R );
 			X = X_+K*(z-X_); //z-X_ is residual,X(k) = X_(k)+K(k)*(z(k)-X_(k)); 
 			P = (Trajectory(1,1,1)-K)*P_; //P(k) = (1-K(k))*P_(k);
@@ -249,16 +241,17 @@ int main(int argc, char **argv)
 			resize(canvas, canvas, Size(canvas.cols/2, canvas.rows/2));
 		}
 		//outputVideo<<canvas;
+
 		imshow("before and after", canvas);
 
 		waitKey(10);
-		//
+
 		prev = cur.clone();//cur.copyTo(prev);
 		cur_grey.copyTo(prev_grey);
 
 		cout << "Frame: " << k << "/" << max_frames << " - good optical flow: " << prev_corner2.size() << endl;
 		k++;
-
 	}
+
 	return 0;
 }
