@@ -8,14 +8,17 @@
 
 class Features {
     public:
-        bool debug = true;
+		/**
+		 * @brief Flag to display debug information.
+		 */
+		bool debug = true;
 
         /**
 		 * @brief Calculate and display SURF features for the entire image.
 		 * 
 		 * @param frame Frame to extract features for.
 		 */
-		void surf(cv::Mat *frame) {
+		std::vector<cv::KeyPoint> surf(cv::Mat *frame) {
             int minHessian = 400;
 
 			// Detect the keypoints using SURF Detector
@@ -31,5 +34,7 @@ class Features {
                 // Show detected (drawn) keypoints
                 cv::imshow("SURF", img);
             }
+
+            return keypoints;
 		}
 };

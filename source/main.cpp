@@ -7,7 +7,6 @@ int main(int argc, char *argv[])
 	}
 
 	SpeedCamera().startVideo(argv[1]);
-	// SpeedCamera().startCamera();
 
 	return 0;
 }
