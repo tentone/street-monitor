@@ -7,7 +7,7 @@ else
     apt update
 
     echo " - Install Python 3"
-    apt install python3 python3-pip
+    apt install -y python3 python3-pip
 
     echo " - Install youtube-dl"
     pip3 install --upgrade yt-dlp
