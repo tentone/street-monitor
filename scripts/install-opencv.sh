@@ -44,7 +44,7 @@ git checkout $VERSION
 echo "    - Generate makefile"
 mkdir build
 cd build
-cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules/ -DOPENCV_ENABLE_NONFREE=1 .. 
+cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules/ -D OPENCV_ENABLE_NONFREE=1 .. -D WITH_CUDA=ON -D WITH_CUDNN=OFF -D OPENCV_DNN_CUDA=ON -D ENABLE_FAST_MATH=1 -D CUDA_FAST_MATH=1
 
 echo "    - Build and Install"
 make install -j8

@@ -65,3 +65,5 @@ source/imgui/glfw
 
 
 models/yolo/
+
+.idea/

@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 		std::cout << "Usage: speed_camera <VIDEO_PATH>" << std::endl;
 	}
 
-	SpeedCamera().startVideo(argv[1]);
+	Monitor().startVideo(argv[1]);
 
 	return 0;
 }
