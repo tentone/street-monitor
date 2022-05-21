@@ -16,7 +16,7 @@ echo " - Update aptitude"
 apt update
 
 echo " - Install Build tools"
-apt install -y cmake gcc g++ make git unzip
+apt install -y cmake gcc g++ make git unzip curl
 
 echo " - Installing Dependencies"
 apt install -y libavcodec-dev libavformat-dev libswscale-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libgtk-3-dev libpng-dev libjpeg-dev libopenexr-dev libtiff-dev libwebp-dev
