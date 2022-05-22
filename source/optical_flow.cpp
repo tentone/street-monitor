@@ -77,8 +77,10 @@ class OpticalFlow {
                     track_points.push_back(parse_points_next[i]);
 
                     // Draw the tracks
-                    cv::line(sparse_mask, parse_points_next[i], parse_points_prev[i], colors[i], 2);
-                    cv::circle(*frame, parse_points_next[i], 5, colors[i], -1);
+                    if (debug) {
+                        cv::line(sparse_mask, parse_points_next[i], parse_points_prev[i], colors[i], 2);
+                        cv::circle(*frame, parse_points_next[i], 5, colors[i], -1);
+                    }
                 }
             }
 
@@ -98,13 +100,12 @@ class OpticalFlow {
          * 
          * @param frame New frame to calculate optical flow.
          */
-        cv::Mat dense_farneback(cv::Mat *frame, int mode)
+        cv::Mat dense_farneback(cv::Mat *frame)
         {   
             cv::Mat next;
             cv::cvtColor(*frame, next, cv::COLOR_BGR2GRAY);
             cv::Mat flow(dense_flow_frame.size(), CV_32FC2);
             cv::calcOpticalFlowFarneback(dense_flow_frame, next, flow, 0.5, 3, 15, 3, 3, 3.0, 0);
-
 
             if (debug) {
                 // Visualization

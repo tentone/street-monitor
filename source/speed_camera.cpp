@@ -22,11 +22,11 @@ class Monitor {
 
 		HaarDetector car_haar = HaarDetector("./models/haar/car.xml");
 
-		YOLODetector yolo = YOLODetector("./models/yolo/yolov5m.onnx", "./models/yolo/yolo.names");
+		YOLODetector yolo = YOLODetector("./models/yolo/yolov5n.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor background_detector;
 
-		int frame = 0;
+		int frame_count = 0;
 
 		/**
 		 * @brief Process a frame of the video feed, can be obtained from camera, video file, dataset etc.
@@ -34,23 +34,24 @@ class Monitor {
 		 * @param fname 
 		 */
 		void processFrame(cv::Mat *frame) {
-			if (frame == 0) {
+			if (frame_count == 0) {
 				optical_flow.initialize(frame);
+				frame_count++;
 				return;
 			}
 
-			// optical_flow.dense(frame);
-			car_haar.detect(frame);
+			optical_flow.sparse(frame);
+			// car_haar.detect(frame);
 
 			cv::Mat mov = background_detector.update(frame);
 			background_detector.segmentBlobs(frame, &mov);
 
-			// yolo.detect(frame);
+			//yolo.detect(frame);
 
 			cv::imshow("Frame", *frame);
 			cv::waitKey(1);
 
-			frame++;
+			frame_count++;
 		}
 
 		/**

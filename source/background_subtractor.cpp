@@ -33,14 +33,17 @@ class BackgroundSubtractor {
 		 * 
 		 * @param frame Frame to calculate moving objects.
 		 */
-		cv::Mat update(cv::Mat *frame)
+		cv::Mat update(cv::Mat *frame, bool close_operation = false)
 		{
 			// Update the background model
 			subtractor->apply(*frame, mask);
 
             // Close operation
-			cv::erode(mask, mask, element);
-			cv::dilate(mask, mask, element);
+			if (close_operation) {
+				cv::erode(mask, mask, element);
+				cv::dilate(mask, mask, element);
+			}
+
 
         	// Show the current frame and the fg masks
             if(debug) {
