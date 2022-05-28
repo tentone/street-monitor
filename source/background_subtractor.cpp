@@ -34,7 +34,7 @@ class BackgroundSubtractor {
 		 * @param frame Frame to calculate moving objects.
 		 */
 		cv::Mat update(cv::Mat *frame, bool close_operation = false)
-		{
+		{\
 			// Update the background model
 			subtractor->apply(*frame, mask);
 
@@ -60,17 +60,21 @@ class BackgroundSubtractor {
 		{
 			// Setup SimpleBlobDetector parameters.
 			cv::SimpleBlobDetector::Params params;
-			params.minThreshold = 200;
+			params.minThreshold = 250;
 			params.maxThreshold = 255;
 			params.thresholdStep = 5;
 			params.minRepeatability = 1;
-			params.minDistBetweenBlobs = 0;
+			params.minDistBetweenBlobs = 10;
 			params.filterByArea = true;
 			params.minArea = 200;
-			params.maxArea = 250000;
+			params.maxArea = 6000;
 			params.filterByCircularity = false;
 			params.filterByConvexity = false;
+			params.maxConvexity = 1.0;
+			params.minConvexity = 0.2;
 			params.filterByInertia = false;
+			params.minInertiaRatio = 0;
+			params.maxInertiaRatio = 0.2;
 			params.filterByColor = false;
 
 			// Set up the detector with default parameters.

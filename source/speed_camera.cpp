@@ -40,13 +40,13 @@ class Monitor {
 				return;
 			}
 
-			optical_flow.sparse(frame);
+			// optical_flow.sparse(frame);
 			// car_haar.detect(frame);
 
 			cv::Mat mov = background_detector.update(frame);
-			background_detector.segmentBlobs(frame, &mov);
+			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
 
-			//yolo.detect(frame);
+			// yolo.detect(frame);
 
 			cv::imshow("Frame", *frame);
 			cv::waitKey(1);
