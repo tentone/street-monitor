@@ -1,4 +1,4 @@
-#include "speed_camera.cpp"
+#include "monitor.cpp"
 #include "object.cpp"
 
 int main(int argc, char *argv[])
