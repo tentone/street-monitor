@@ -14,7 +14,7 @@ class BackgroundSubtractor {
         /**
          * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
          */
-		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(500, 400, true);
+		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::backgroundSubtractorMOG2(500, 400, true);
 		
 		/**
 		 * @brief Mask image used to store the result of background subtraction.
@@ -66,8 +66,8 @@ class BackgroundSubtractor {
 			params.minRepeatability = 1;
 			params.minDistBetweenBlobs = 10;
 			params.filterByArea = true;
-			params.minArea = 200;
-			params.maxArea = 6000;
+			params.minArea = 1e2;
+			params.maxArea = 1e5;
 			params.filterByCircularity = false;
 			params.filterByConvexity = false;
 			params.maxConvexity = 1.0;

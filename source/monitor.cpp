@@ -46,6 +46,12 @@ class Monitor {
 			cv::Mat mov = background_detector.update(frame);
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
 
+			for (int i = 0; i < moving.size(); i++) {
+
+				std::cout << moving[i].pt.x << ", " << moving[i].pt.y << std::endl;
+			
+			}
+
 			// yolo.detect(frame);
 
 			cv::imshow("Frame", *frame);
