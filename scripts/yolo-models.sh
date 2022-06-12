@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo " - Download YOLO V5"
+echo " - Download Pre-Converted YOLO V5"
 cd ../models
 mkdir yolo
 cd ./yolo/

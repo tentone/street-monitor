@@ -18,10 +18,10 @@
  - The file scripts/dataset.sh can be used to obtain test data.
  - Test video data is obtained from youtube might be suject to licensing and not available for commercial usage.
 
-### DNN Models
+### YOLO V5 Model
  - YOLO model is used to classify moving objects such as cars and pedestrians.
  - YOLO V5 is available on https://pytorch.org/hub/ultralytics_yolov5/ / https://github.com/ultralytics/yolov5, check the latest releases on github.
- - The PyTorch models have to be converted into ONNX files.
+    - The PyTorch models have to be converted into ONNX files.
 
 ### License
 - This project is distributed under MIT license and can be freely used for commercial applications.

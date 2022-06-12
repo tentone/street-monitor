@@ -67,3 +67,5 @@ source/imgui/glfw
 models/yolo/
 
 .idea/
+
+scripts/yolov5/
