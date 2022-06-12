@@ -23,7 +23,7 @@ class Monitor {
 
 		HaarDetector car_haar = HaarDetector("./models/haar/car.xml");
 
-		YOLODetector yolo = YOLODetector("./models/yolo/yolov5n.onnx", "./models/yolo/yolo.names");
+		YOLODetector yolo = YOLODetector("./models/yolo/yolov5s.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor background_detector;
 
@@ -42,7 +42,6 @@ class Monitor {
 			}
 
 			// optical_flow.sparse(frame);
-			// car_haar.detect(frame);
 
 			cv::Mat mov = background_detector.update(frame);
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
@@ -51,7 +50,11 @@ class Monitor {
 			// 	std::cout << moving[i].pt.x << ", " << moving[i].pt.y << std::endl;
 			// }
 
-			// yolo.detect(frame);
+			if (frame_count % 30 == 0){
+				// car_haar.detect(frame);
+				yolo.detect(frame);
+			}
+			
 
 			cv::imshow("Frame", *frame);
 			cv::waitKey(1);

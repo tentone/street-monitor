@@ -33,12 +33,12 @@ class YOLODetector {
 		/**
 		 * @brief Score threshold to consider that the object is of a specific object class. (e.g. confidence that is a car).
 		 */
-		const float SCORE_THRESHOLD = 0.5;
+		const float SCORE_THRESHOLD = 0.3;
 
 		/**
 		 * @brief Confidence threshold to consider the object detected. Confidence that those pixels are a object.
 		 */
-		const float CONFIDENCE_THRESHOLD = 0.55;
+		const float CONFIDENCE_THRESHOLD = 0.2;
 
 		/**
 		 * @brief DNN model used to detect objects.

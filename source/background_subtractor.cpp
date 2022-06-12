@@ -14,8 +14,8 @@ class BackgroundSubtractor {
 		/**
 		 * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
 		 */
-		//cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(250, 15.0, false);
-		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(200, 500.0, false);
+		// cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(600, 15.0, true);
+		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(300, 600.0, true);
 
 		/**
 		 * @brief Mask image used to store the result of background subtraction.
@@ -25,7 +25,7 @@ class BackgroundSubtractor {
 		/**
 		 * @brief Structuring element for the binary closing operation, used to remove "noise" after background subtraction.
 		 */
-		cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5), cv::Point(3, 3));
+		cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3), cv::Point(1, 1));
 
 		/**
 		 * @brief Perform background subtraction and return binary mask of moving objects. Background model is updated based on the last n frames.
@@ -60,9 +60,9 @@ class BackgroundSubtractor {
 		{
 			// Setup SimpleBlobDetector parameters.
 			cv::SimpleBlobDetector::Params params;
-			params.minThreshold = 250;
+			params.minThreshold = 245;
 			params.maxThreshold = 255;
-			params.thresholdStep = 5;
+			params.thresholdStep = 10;
 			params.minRepeatability = 1;
 			params.minDistBetweenBlobs = 10;
 			params.filterByArea = true;
