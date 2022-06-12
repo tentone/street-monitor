@@ -1,5 +1,4 @@
 #include "monitor.cpp"
-#include "object.cpp"
 
 int main(int argc, char *argv[])
 {

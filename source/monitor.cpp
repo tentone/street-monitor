@@ -16,6 +16,7 @@
 #include "background_subtractor.cpp"
 #include "features.cpp"
 #include "tracker.cpp"
+#include "street_object.cpp"
 
 class Monitor {
 	public:
@@ -23,12 +24,23 @@ class Monitor {
 
 		HaarDetector car_haar = HaarDetector("./models/haar/car.xml");
 
-		YOLODetector yolo = YOLODetector("./models/yolo/yolov5s.onnx", "./models/yolo/yolo.names");
+		YOLODetector yolo = YOLODetector("./models/yolo/yolov5m.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor background_detector;
 
+        std::vector<StreetObject> objects;
+
 		int frame_count = 0;
 
+		/**
+		 * @brief Initialize the monitor detector using information from the first frame.
+		 * 
+		 * @param fname 
+		 */
+		void initialize(cv::Mat *frame) {
+			optical_flow.initialize(frame);
+		}
+		
 		/**
 		 * @brief Process a frame of the video feed, can be obtained from camera, video file, dataset etc.
 		 * 
@@ -36,7 +48,7 @@ class Monitor {
 		 */
 		void processFrame(cv::Mat *frame) {
 			if (frame_count == 0) {
-				optical_flow.initialize(frame);
+				this->initialize(frame);
 				frame_count++;
 				return;
 			}

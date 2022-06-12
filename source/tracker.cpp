@@ -12,7 +12,7 @@
 
 class Tracker {
     
-    Tracker() {
+    Tracker(cv::Rect roi) {
         
     }
 

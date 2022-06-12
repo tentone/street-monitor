@@ -33,7 +33,7 @@ class YOLODetector {
 		/**
 		 * @brief Score threshold to consider that the object is of a specific object class. (e.g. confidence that is a car).
 		 */
-		const float SCORE_THRESHOLD = 0.3;
+		const float SCORE_THRESHOLD = 0.45;
 
 		/**
 		 * @brief Confidence threshold to consider the object detected. Confidence that those pixels are a object.
@@ -70,7 +70,7 @@ class YOLODetector {
 		 * 
 		 * @param frame Frame to be processed
 		 */
-		std::vector<cv::Mat> detect(cv::Mat *frame) {
+		std::vector<cv::Mat> detect(cv::Mat *frame, std::string debug_window = "YOLO") {
 			std::vector<cv::Mat> detections = this->classify(*frame);
 
 			if (this->debug) {
@@ -84,7 +84,7 @@ class YOLODetector {
 				std::string label = cv::format("Time: %.2f ms", t);
 				cv::putText(img, label, cv::Point(20, 40), cv::FONT_HERSHEY_SIMPLEX, 0.7, RED);
 
-				cv::imshow("YOLO", clone);
+				cv::imshow(debug_window, clone);
 			}
 
 

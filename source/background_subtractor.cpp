@@ -64,9 +64,9 @@ class BackgroundSubtractor {
 			params.maxThreshold = 255;
 			params.thresholdStep = 10;
 			params.minRepeatability = 1;
-			params.minDistBetweenBlobs = 10;
+			params.minDistBetweenBlobs = 0;
 			params.filterByArea = true;
-			params.minArea = 1e2;
+			params.minArea = 50;
 			params.maxArea = 1e5;
 			params.filterByCircularity = false;
 			params.filterByConvexity = false;

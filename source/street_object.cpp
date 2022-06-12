@@ -4,10 +4,10 @@
 #include <opencv2/core.hpp>
 
 // Possible car colors detected
-enum Category { unknown, car, person, truck };
+enum Category { unknown, car, person, bus, truck };
 
 // Detection of an object in an frame
-class ObjectFrameInfo {
+class StreetObjectFrameInfo {
     public:
         // Frame number where the object is placed
         int frame;
@@ -21,7 +21,7 @@ class ObjectFrameInfo {
 
 
 // Description of the car
-class Object {
+class StreetObject {
     private: 
         static int _id;
 
@@ -33,10 +33,10 @@ class Object {
         Category category;
         
         // Vector of detection of this object
-        std::vector<ObjectFrameInfo> frames;
+        std::vector<StreetObjectFrameInfo> frames;
 
-        Object() {
-            this->id = Object::_id++;
+        StreetObject() {
+            this->id = StreetObject::_id++;
             this->category = unknown;
         }
 };

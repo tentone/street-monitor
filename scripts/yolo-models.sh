@@ -1,12 +1,9 @@
 #!/bin/bash
 
-
-
 echo " - Download YOLO V5"
 cd ../models
 mkdir yolo
 cd ./yolo/
-
 
 echo "    - YOLO V5 Medium"
 curl https://raw.githubusercontent.com/spmallick/learnopencv/master/Object-Detection-using-YOLOv5-and-OpenCV-DNN-in-CPP-and-Python/models/yolov5m.onnx -o yolov5m.onnx
