@@ -5,17 +5,18 @@
 #include <opencv2/features2d.hpp>
 
 class BackgroundSubtractor {
-    public:
+	public:
 		/**
 		 * @brief Flag to display debug information.
 		 */
 		bool debug = true;
 
-        /**
-         * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
-         */
-		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::backgroundSubtractorMOG2(500, 400, true);
-		
+		/**
+		 * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
+		 */
+		//cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(250, 15.0, false);
+		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(200, 500.0, false);
+
 		/**
 		 * @brief Mask image used to store the result of background subtraction.
 		 */
@@ -34,23 +35,22 @@ class BackgroundSubtractor {
 		 * @param frame Frame to calculate moving objects.
 		 */
 		cv::Mat update(cv::Mat *frame, bool close_operation = false)
-		{\
+		{
 			// Update the background model
 			subtractor->apply(*frame, mask);
 
-            // Close operation
+			// Close operation
 			if (close_operation) {
 				cv::erode(mask, mask, element);
 				cv::dilate(mask, mask, element);
 			}
 
+			// Show the current frame and the fg masks
+			if(debug) {
+				cv::imshow("Background Subtraction", mask);
+			}
 
-        	// Show the current frame and the fg masks
-            if(debug) {
-                cv::imshow("Background Subtraction", mask);
-            }
-
-            return mask;
+			return mask;
 		}
 
 		/**
