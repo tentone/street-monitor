@@ -9,14 +9,22 @@ cd yolov5
 pip install -r requirements.txt
 
 echo " - Download PyTorch models"
-curl https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5n.pt -o yolov5n.pt
-# curl https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5m.pt -o yolov5m.pt
-# curl https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5l.pt -o yolov5l.pt
-# curl https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5x.pt -o yolov5x.pt
-# curl https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5n6.pt -o yolov5n6.pt
+YOLO_SIZES=("n" "s" "m" "l" "x" "n6")
+
+for i in "${YOLO_SIZES[@]}"; do
+    curl -L "https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5$i.pt" -o "yolov5$i.pt"
+done
 
 echo " - Convert to ONNX"
-python3 export.py --weights yolov5n.pt --include torchscript onnx
+for i in "${YOLO_SIZES[@]}"; do
+    python3 export.py --weights yolov5$i.pt --include onnx
+done
 
-# echo " - Clean up files"
-# rm -rf ./yolov5
+echo " - Copy files to models"
+cp *.onnx ../../models/yolo/.
+
+echo " - Clean up files"
+cd ..
+rm -rf ./yolov5
+
+echo " - Done!"
