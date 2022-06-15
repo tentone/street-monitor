@@ -24,7 +24,7 @@ class Monitor {
 
 		HaarDetector car_haar = HaarDetector("./models/haar/car.xml");
 
-		YOLODetector yolo = YOLODetector("./models/yolo/yolov5m.onnx", "./models/yolo/yolo.names");
+		YOLODetector yolo = YOLODetector("./models/yolo/yolov5x.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor background_detector;
 
