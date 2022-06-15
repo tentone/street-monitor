@@ -18,12 +18,12 @@ class YOLODetector {
 		/**
 		 * @brief Width of the image to be processed. The image is resized to match this size.
 		 */
-		const float INPUT_WIDTH = 640.0;
+		float input_width = 640.0;
 		
 		/**
 		 * @brief Height of the image to be processed. The image is resized to match this size.
 		 */
-		const float INPUT_HEIGHT = 640.0;
+		float input_height = 640.0;
 
 		/**
 		 * @brief Threshold used in non maximum suppression.
@@ -55,10 +55,13 @@ class YOLODetector {
 		 * 
 		 * @param model Path to the DNN model to be used.
 		 */
-		YOLODetector(std::string modelf, std::string classf)
+		YOLODetector(std::string modelf, std::string classf, float width = 640.0, float height = 640.0)
 		{	
 			// Load classes
 			this->loadClasses(classf);
+
+			this->input_width = width;
+			this->input_height = height;
 
 			// Load model.
 			this->net = cv::dnn::readNet(modelf); 
@@ -149,7 +152,7 @@ class YOLODetector {
 		{
 			// Convert to blob.
 			cv::Mat blob;
-			cv::dnn::blobFromImage(frame, blob, 1./255., cv::Size(INPUT_WIDTH, INPUT_HEIGHT), cv::Scalar(), true, false);
+			cv::dnn::blobFromImage(frame, blob, 1./255., cv::Size(this->input_width, this->input_height), cv::Scalar(), true, false);
 
 			// Network input
 			this->net.setInput(blob);
@@ -177,8 +180,8 @@ class YOLODetector {
 			std::vector<cv::Rect> boxes; 
 
 			// Resizing factor.
-			float x_factor = frame.cols / INPUT_WIDTH;
-			float y_factor = frame.rows / INPUT_HEIGHT;
+			float x_factor = frame.cols / this->input_width;
+			float y_factor = frame.rows / this->input_height;
 
 			float *data = (float *)predictions[0].data;
 
