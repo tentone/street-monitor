@@ -58,9 +58,10 @@ class Monitor {
 			cv::Mat mov = background_detector.update(frame);
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
 
-			// for (int i = 0; i < moving.size(); i++) {
-			// 	std::cout << moving[i].pt.x << ", " << moving[i].pt.y << std::endl;
-			// }
+			for (int i = 0; i < moving.size(); i++) {
+				
+				std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
+			}
 
 			if (frame_count % 30 == 0){
 				// car_haar.detect(frame);
