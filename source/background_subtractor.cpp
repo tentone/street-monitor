@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <math.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
@@ -20,7 +21,7 @@ class BackgroundSubtractor {
 		 * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
 		 */
 		// cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(600, 15.0, true);
-		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(300, 600.0, true);
+		cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorKNN(300, 500.0, true);
 
 		/**
 		 * @brief Mask image used to store the result of background subtraction.
@@ -43,14 +44,14 @@ class BackgroundSubtractor {
 			if (a.rows > 0 && a.rows == b.rows && a.cols > 0 && a.cols == b.cols)
 			{
 				// Calculate the L2 relative error between images.
-				double errorL2 = cv::norm(a, b, cv::NORM_L2);
+				double err = cv::norm(a, b, cv::NORM_L2);
 
-				// Convert to a reasonable scale, since L2 error is summed across all pixels of the image.
-				return errorL2 / (double)(a.rows * a.cols);
+				// Scale the output since L2 error is summed across all pixels of the image.
+				return err / (double)(a.rows * a.cols);
 			}
 
 			// Images have diferente size
-			return 100000000.0;  
+			return INFINITY;
 		}
 
 		/**
@@ -96,7 +97,7 @@ class BackgroundSubtractor {
 			params.minRepeatability = 1;
 			params.minDistBetweenBlobs = 0;
 			params.filterByArea = true;
-			params.minArea = 50;
+			params.minArea = 80;
 			params.maxArea = 1e5;
 			params.filterByCircularity = false;
 			params.filterByConvexity = false;

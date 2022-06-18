@@ -29,6 +29,9 @@ class Monitor {
 
 		BackgroundSubtractor background_detector;
 
+		/**
+		 * @brief Objects visible in the scene.
+		 */
         std::vector<StreetObject> objects;
 
 		int frame_count = 0;
@@ -60,17 +63,23 @@ class Monitor {
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
 
 			for (int i = 0; i < moving.size(); i++) {
-		
+				bool exists = false;
+				
+				// Check if the moving box intersects one of the objects 
+				for (int j = 0; j < this->objects.size(); j++) {
+					// TODO <ADD CODE HERE>
+				}
+
+				// 
+
 				std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
 			}
 
 			if (frame_count % 30 == 0){
 				// car_haar.detect(frame);
-
 				// std::future<std::vector<YOLOObject>> values = std::async(std::launch::async, yolo.detect, frame);
-				std::vector<YOLOObject> objects = yolo.detect(frame);
+				// std::vector<YOLOObject> objects = yolo.detect(frame);
 			}
-			
 
 			cv::imshow("Frame", *frame);
 			cv::waitKey(1);
