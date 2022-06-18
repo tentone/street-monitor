@@ -62,6 +62,10 @@ class BackgroundSubtractor {
 		 */
 		cv::Mat update(cv::Mat *frame, bool close_operation = false)
 		{
+			if (this->reset_on_change) {
+				// TODO <ADD CODE HERE>
+			}
+
 			// Update the background model
 			subtractor->apply(*frame, mask);
 
