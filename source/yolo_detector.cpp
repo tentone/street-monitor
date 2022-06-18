@@ -8,6 +8,32 @@ cv::Scalar BLUE = cv::Scalar(255,0,0);
 cv::Scalar YELLOW = cv::Scalar(0,255, 255);
 cv::Scalar RED = cv::Scalar(0,0,255);
 
+/**
+ * @brief Represents a object detection alognside with its confidence level and class label.
+ */
+class YOLOObject {
+	public:
+		/**
+		 * @brief ID of the object class.
+		 */
+		int class_id;
+		
+		/**
+		 * @brief Level of confidence from 0.0 to 1.0 that this object belogs to the class indicated.
+		 */
+		float confidence;
+		
+		/**
+		 * @brief Bouding box of the object.
+		 */
+		cv::Rect box; 
+};
+
+/**
+ * @brief Class to detect and classify objects using the YOLO DNN.
+ * 
+ * YOLO V5 is used from ONNX models that have to be added to the "./models/yolo" directory.
+ */
 class YOLODetector {
 	public:
 		/**
@@ -87,7 +113,78 @@ class YOLODetector {
 				std::string label = cv::format("Time: %.2f ms", t);
 				cv::putText(img, label, cv::Point(20, 40), cv::FONT_HERSHEY_SIMPLEX, 0.7, RED);
 
+				// Draw debug window
 				cv::imshow(debug_window, clone);
+			}
+
+
+			return detections;
+		}
+
+		/**
+		 * @brief Extract detections from the detection matrix.
+		 * 
+		 */
+		std::vector<YOLOObject> extractDetections(cv::Mat &frame, std::vector<cv::Mat> &predictions) {
+			std::vector<YOLOObject> detections;
+
+			// Resizing factor.
+			float x_factor = frame.cols / this->input_width;
+			float y_factor = frame.rows / this->input_height;
+
+			// Predition data pointer
+			float *data = (float *)predictions[0].data;
+
+			// size_t size = predictions[0].GetTensorTypeAndShapeInfo().GetElementCount(); // 1x25200x85=2142000
+			const int dimensions = 85; // 0,1,2,3 ->box,4->confidence，5-85 -> coco classes confidence 
+			int rows = 25200; // size / dimensions; //25200
+
+			// Iterate through all detections.
+			for (int i = 0; i < rows; ++i) 
+			{
+				float confidence = data[4];
+
+				// Discard bad detections and continue.
+				if (confidence >= CONFIDENCE_THRESHOLD) 
+				{
+					float *classes_scores = data + 5;
+
+					// Create a 1x85 cv::Mat and store class scores of 80 classes.
+					cv::Mat scores(1, this->classes.size(), CV_32FC1, classes_scores);
+
+					// Perform minMaxLoc and acquire index of best class score.
+					cv::Point class_id;
+					double max_class_score;
+					minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
+					
+					// Continue if the class score is above the threshold.
+					if (max_class_score > SCORE_THRESHOLD) 
+					{
+						YOLOObject detection;
+						detection.confidence = confidence;
+						detection.class_id = class_id.x;
+				
+						// Center.
+						float cx = data[0];
+						float cy = data[1];
+
+						// Box dimension.
+						float w = data[2];
+						float h = data[3];
+						
+						// Bounding box coordinates.
+						int left = int((cx - 0.5 * w) * x_factor);
+						int top = int((cy - 0.5 * h) * y_factor);
+						int width = int(w * x_factor);
+						int height = int(h * y_factor);
+						
+						detection.box = cv::Rect(left, top, width, height);
+						detections.push_back(detection);
+					}
+
+				}
+				// Jump to the next column.
+				data += dimensions;
 			}
 
 
@@ -183,12 +280,19 @@ class YOLODetector {
 			float x_factor = frame.cols / this->input_width;
 			float y_factor = frame.rows / this->input_height;
 
+			// Predition data pointer
 			float *data = (float *)predictions[0].data;
+			
+			// Size of the prediction data. Should be a [1 x size] matrix.
+			cv::Size s = predictions[0].size();
+			
+			// Dimension of each detection. From [0:3]-> bouding box, 4->confidence，5-85 -> coco classes confidence.
+			const int dimensions = 85; 
 
-			const int dimensions = 85;
-			const int rows = 25200;
+			// Output size of the classifier 
+			int rows = s.width;
 
-			// Iterate through 25200 detections.
+			// Iterate through all detections.
 			for (int i = 0; i < rows; ++i) 
 			{
 				float confidence = data[4];
@@ -196,7 +300,7 @@ class YOLODetector {
 				// Discard bad detections and continue.
 				if (confidence >= CONFIDENCE_THRESHOLD) 
 				{
-					float * classes_scores = data + 5;
+					float *classes_scores = data + 5;
 
 					// Create a 1x85 cv::Mat and store class scores of 80 classes.
 					cv::Mat scores(1, this->classes.size(), CV_32FC1, classes_scores);
@@ -210,28 +314,30 @@ class YOLODetector {
 					if (max_class_score > SCORE_THRESHOLD) 
 					{
 						// Store class ID and confidence in the pre-defined respective std::vectors.
-
 						confidences.push_back(confidence);
 						class_ids.push_back(class_id.x);
 
 						// Center.
 						float cx = data[0];
 						float cy = data[1];
+
 						// Box dimension.
 						float w = data[2];
 						float h = data[3];
+						
 						// Bounding box coordinates.
 						int left = int((cx - 0.5 * w) * x_factor);
 						int top = int((cy - 0.5 * h) * y_factor);
 						int width = int(w * x_factor);
 						int height = int(h * y_factor);
+						
 						// Store good detections in the boxes std::vector.
 						boxes.push_back(cv::Rect(left, top, width, height));
 					}
 
 				}
 				// Jump to the next column.
-				data += 85;
+				data += dimensions;
 			}
 
 			// Perform Non Maximum Suppression and draw predictions.
@@ -262,5 +368,4 @@ class YOLODetector {
 
 			return frame;
 		}
-
 };

@@ -60,6 +60,8 @@ class Monitor {
 
 			for (int i = 0; i < moving.size(); i++) {
 				
+
+
 				std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
 			}
 
