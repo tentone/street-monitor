@@ -12,6 +12,11 @@ class BackgroundSubtractor {
 		bool debug = true;
 
 		/**
+		 * @brief Reset the background subtrator if there is a sudden change in the image. (e.g. camera moved, lighting etc)
+		 */
+		bool reset_on_change = true;
+
+		/**
 		 * @brief Background subtractor instance that stores the last n frames and compares background for new frame.
 		 */
 		// cv::Ptr<cv::BackgroundSubtractor> subtractor = cv::createBackgroundSubtractorMOG2(600, 15.0, true);
@@ -26,6 +31,27 @@ class BackgroundSubtractor {
 		 * @brief Structuring element for the binary closing operation, used to remove "noise" after background subtraction.
 		 */
 		cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3), cv::Point(1, 1));
+
+		/**
+		 * @brief Compare two images by getting the L2 error (square-root of sum of squared error).
+		 * 
+		 * @param A Image A to compare.
+		 * @param B Image B to compare.
+		 * @return double Level of similarity of the image.
+		 */
+		double getSimilarity(const cv::Mat a, const cv::Mat b) {
+			if (a.rows > 0 && a.rows == b.rows && a.cols > 0 && a.cols == b.cols)
+			{
+				// Calculate the L2 relative error between images.
+				double errorL2 = cv::norm(a, b, cv::NORM_L2);
+
+				// Convert to a reasonable scale, since L2 error is summed across all pixels of the image.
+				return errorL2 / (double)(a.rows * a.cols);
+			}
+
+			// Images have diferente size
+			return 100000000.0;  
+		}
 
 		/**
 		 * @brief Perform background subtraction and return binary mask of moving objects. Background model is updated based on the last n frames.

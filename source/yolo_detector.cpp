@@ -99,8 +99,9 @@ class YOLODetector {
 		 * 
 		 * @param frame Frame to be processed
 		 */
-		std::vector<cv::Mat> detect(cv::Mat *frame, std::string debug_window = "YOLO") {
+		std::vector<YOLOObject> detect(cv::Mat *frame, std::string debug_window = "YOLO") {
 			std::vector<cv::Mat> detections = this->classify(*frame);
+			std::vector<YOLOObject> objects = this->extractDetections(*frame, detections);
 
 			if (this->debug) {
 				cv::Mat clone = frame->clone();
@@ -118,7 +119,7 @@ class YOLODetector {
 			}
 
 
-			return detections;
+			return objects;
 		}
 
 		/**
@@ -285,7 +286,7 @@ class YOLODetector {
 			
 			// Size of the prediction data. Should be a [1 x size] matrix.
 			cv::Size s = predictions[0].size();
-			
+
 			// Dimension of each detection. From [0:3]-> bouding box, 4->confidence，5-85 -> coco classes confidence.
 			const int dimensions = 85; 
 

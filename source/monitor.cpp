@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <future>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -59,15 +60,15 @@ class Monitor {
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
 
 			for (int i = 0; i < moving.size(); i++) {
-				
-
-
+		
 				std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
 			}
 
 			if (frame_count % 30 == 0){
 				// car_haar.detect(frame);
-				yolo.detect(frame);
+
+				// std::future<std::vector<YOLOObject>> values = std::async(std::launch::async, yolo.detect, frame);
+				std::vector<YOLOObject> objects = yolo.detect(frame);
 			}
 			
 
