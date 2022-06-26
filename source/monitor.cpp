@@ -76,9 +76,11 @@ class Monitor {
 			}
 
 			if (frame_count % 30 == 0){
-				// car_haar.detect(frame);
-				// std::future<std::vector<YOLOObject>> values = std::async(std::launch::async, yolo.detect, frame);
+				// Detect objects using the YOLO DNN
 				// std::vector<YOLOObject> objects = yolo.detect(frame);
+
+				// Check if the boxes detected match one of the objects.
+				
 			}
 
 			cv::imshow("Frame", *frame);

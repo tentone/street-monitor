@@ -32,11 +32,10 @@ class StreetObjectFrameInfo {
      * @brief Get the bouding box for this frame.
      */
     cv::Rect boudingBox() {
-        cv::Point corner = cv::Point(this->center.x - this->size.x / 2, this->center.y - this->size.y / 2);
+        cv::Point corner = cv::Point(this->center.x - this->size.width / 2, this->center.y - this->size.height / 2);
 
-        return cv::Rect(corner, this->size.clone());
+        return cv::Rect(corner, this->size);
     }
-
 };
 
 
@@ -50,10 +49,19 @@ class StreetObject {
         static int _id;
 
     public:
-        // Identifier (sequential)
+        /**
+         * @brief Sequential identifier of the object.
+         */
         int id;
 
-        // Category of the object detected
+        /**
+         * @brief The last frame when this object was updated.
+         */
+        int frame;
+    
+        /**
+         * @brief Category of the object detected.
+         */
         Category category;
         
         // Detection of this object
@@ -73,6 +81,9 @@ class StreetObject {
             return this->frames.size();
         }
 
+
+
+
         /**
          * @brief Get the last bouding box for this object.
          */
@@ -82,10 +93,7 @@ class StreetObject {
                 return cv::Rect();
             }
 
-            this->frames[size - 1];
-
-
-            return cv::Rect();
+            return this->frames[size - 1].boudingBox();
         }
 
         /**
@@ -93,16 +101,24 @@ class StreetObject {
          * 
          * The size of the vector can be used to estimate its velocity in the image.
          * 
-         * @return cv::Vec3d 
+         * @return cv::Point 
          */
-        cv::Vec3d directionVector(int avg_frames = 3) {
+        cv::Point averageDirection() {
             if (this->frames.size() < 2) {
-                return cv::Vec3d();
+                return cv::Point();
+            }
+            
+            cv::Point avg = cv::Point();
+
+            for (int i = 0; i < this->frames.size() - 1; i++) {
+                avg.x += this->frames[i + 1].center.x - this->frames[i].center.x;
+                avg.y += this->frames[i + 1].center.y - this->frames[i].center.y;
             }
 
-            // TODO <ADD CODE HERE>
+            avg.x /= this->frames.size();
+            avg.y /= this->frames.size();
 
-            return cv::Vec3d();
+            return avg;
         }
 };
 
