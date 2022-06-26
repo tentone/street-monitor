@@ -75,22 +75,48 @@ class StreetObject {
         /**
          * @brief Number of frames available for this object.
          * 
-         * @return int 
+         * @return int Number of frames for the object.
          */
         int length() {
             return this->frames.size();
         }
 
         /**
+         * @brief Get the last frame of the object.
+         * 
+         * @return StreetObjectFrameInfo 
+         */
+        StreetObjectFrameInfo last() {
+            if (this->length() == 0) {
+                throw "There are no frames for the object.";
+            }
+
+
+            return this->frames.back();
+        }
+
+
+        /**
+         * @brief  Check if object collides with keypoint from new frame.
+         */
+        bool collidesKeyframe(cv::KeyPoint kp)
+        {
+            auto frame = this->last();
+
+            // TODO <ADD CODE HERE>
+
+            return false;
+        }
+
+        /**
          * @brief Get the last bouding box for this object.
          */
         cv::Rect boudingBox() {
-            int size = this->frames.size();
-            if (size == 0) {
-                return cv::Rect();
+            if (this->length() == 0) {
+                throw "There are no frames for the object.";
             }
 
-            return this->frames[size - 1].boudingBox();
+            return this->last().boudingBox();
         }
 
         /**
@@ -101,8 +127,8 @@ class StreetObject {
          * @return cv::Point 
          */
         cv::Point averageDirection() {
-            if (this->frames.size() < 2) {
-                return cv::Point();
+            if (this->length() < 2) {
+                throw "At least two frames are required to calculate direction.";
             }
             
             cv::Point avg = cv::Point();

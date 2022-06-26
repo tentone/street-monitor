@@ -70,11 +70,12 @@ class Monitor {
 				for (int j = 0; j < this->objects.size(); j++) {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
-
+						
 					}
 				}
 
 				// Create new object in the list
+				// TODo <ADD CODE HERE>
 				
 
 				std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
