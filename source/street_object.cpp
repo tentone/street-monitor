@@ -81,9 +81,6 @@ class StreetObject {
             return this->frames.size();
         }
 
-
-
-
         /**
          * @brief Get the last bouding box for this object.
          */

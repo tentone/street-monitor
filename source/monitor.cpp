@@ -61,18 +61,37 @@ class Monitor {
 
 			cv::Mat mov = background_detector.update(frame);
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
-
+			
+			// Iterate list of moving objects
 			for (int i = 0; i < moving.size(); i++) {
 				bool exists = false;
 				
 				// Check if the moving box intersects one of the objects 
 				for (int j = 0; j < this->objects.size(); j++) {
-					// TODO <ADD CODE HERE>
+					// Object still has not been updated in this frame.
+					if (this->objects[j].frame < frame_count) {
+
+					}
 				}
 
-				// 
+				// Create new object in the list
+				
 
 				std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
+			}
+
+			static const int max_age = 100;
+
+			// If an object has not been seen for more than n frames remove it
+			auto obj_pointer = this->objects.begin();
+			while (obj_pointer < this->objects.end()) {
+				int age = frame_count - (*obj_pointer).frame;
+				if (age > max_age) {
+					obj_pointer = this->objects.erase(obj_pointer);
+					continue;
+				}
+
+				obj_pointer++;
 			}
 
 			if (frame_count % 30 == 0){
