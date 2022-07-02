@@ -64,7 +64,7 @@ source/imgui/imgui
 source/imgui/glfw
 
 
-models/yolo/
+models/yolo/*.onnx
 
 .idea/
 
