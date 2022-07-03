@@ -70,7 +70,7 @@ class Monitor {
 				for (int j = 0; j < this->objects.size(); j++) {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
-						if (this->objects[j].collidesKeyframe(moving[i])) {
+						if (this->objects[j].collidesKeypoint(moving[i])) {
 							exists = true;
 						}
 					}
@@ -103,6 +103,13 @@ class Monitor {
 
 				// Check if the boxes detected match one of the objects.
 				
+			}
+
+			// Draw objects into the frame
+			obj_pointer = this->objects.begin();
+			while (obj_pointer < this->objects.end()) {
+				// TODO <ADD CODE HERE>
+				obj_pointer++;
 			}
 
 			cv::imshow("Frame", *frame);

@@ -97,21 +97,27 @@ class StreetObject {
             return this->frames.back();
         }
 
+        /**
+         * @brief Update with keypoint position.
+         */
+        void updateKeypoint(cv::KeyPoint kp)
+        {
+            // TODO <ADD CODE HERE>
+        }
 
         /**
-         * @brief  Check if object collides with keypoint from new frame.
+         * @brief Check if object collides with keypoint from new frame.
          */
-        bool collidesKeyframe(cv::KeyPoint kp)
+        bool collidesKeypoint(cv::KeyPoint kp)
         {
             auto frame = this->last();
             auto box = this->boudingBox();
           
-            intersectCircleRect(kp.)
-
-            return false;
+            return intersectCircleRect(kp.pt, kp.size, box);
         }
 
         /**
+         * 
          * @brief Get the last bouding box for this object.
          */
         cv::Rect boudingBox() {
