@@ -3,6 +3,8 @@
 
 #include <opencv2/core.hpp>
 
+#include "utils.cpp"
+
 /**
  * @brief Possible categories detected by the system.
  */
@@ -102,8 +104,9 @@ class StreetObject {
         bool collidesKeyframe(cv::KeyPoint kp)
         {
             auto frame = this->last();
-
-            // TODO <ADD CODE HERE>
+            auto box = this->boudingBox();
+          
+            intersectCircleRect(kp.)
 
             return false;
         }
