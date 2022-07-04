@@ -71,6 +71,7 @@ class Monitor {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
 						if (this->objects[j].collidesKeypoint(moving[i])) {
+							this->objects[j].updateKeypoint(moving[i], frame_count);
 							exists = true;
 						}
 					}
@@ -78,6 +79,10 @@ class Monitor {
 
 				// Create new object in the list
 				if (!exists) {
+					StreetObject obj;
+					obj.updateKeypoint(moving[i], frame_count);
+					this->objects.push_back(obj);
+
 					// TODo <ADD CODE HERE>
 					std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
 				}

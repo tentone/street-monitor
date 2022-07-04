@@ -41,15 +41,14 @@ class StreetObjectFrameInfo {
 };
 
 
+int _id = 0;
+
 /**
  * @brief Represents an object that is moving trough the street.
  * 
  * Can be a vehicle or a pedestrian.
  */
 class StreetObject {
-    private: 
-        static int _id;
-
     public:
         /**
          * @brief Sequential identifier of the object.
@@ -70,7 +69,7 @@ class StreetObject {
         std::vector<StreetObjectFrameInfo> frames;
 
         StreetObject() {
-            this->id = StreetObject::_id++;
+            this->id = _id++;
             this->category = unknown;
         }
         
@@ -100,9 +99,15 @@ class StreetObject {
         /**
          * @brief Update with keypoint position.
          */
-        void updateKeypoint(cv::KeyPoint kp)
+        void updateKeypoint(cv::KeyPoint kp, int frame)
         {
-            // TODO <ADD CODE HERE>
+            this->frame = frame;
+
+            StreetObjectFrameInfo info;
+            info.frame = frame;
+            info.center = cv::Point(kp.pt.x, kp.pt.y);
+            info.size = cv::Size(kp.size, kp.size);
+            this->frames.push_back(info);
         }
 
         /**
