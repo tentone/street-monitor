@@ -45,7 +45,7 @@ git checkout $VERSION
 echo "    - Generate makefile"
 mkdir build
 cd build
-cmake -D ENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules/ -D BUILD_EXAMPLES=OFF -D WITH_V4L=ON -D WITH_TBB=ON -D OPENCV_ENABLE_NONFREE=1 -D ENABLE_FAST_MATH=1  .. #-D WITH_CUDA=ON -D WITH_CUDNN=ON -D OPENCV_DNN_CUDA=ON -D CUDA_FAST_MATH=1 -D CUDA_ARCH_BIN=7.5 .. 
+cmake -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules/ -D BUILD_EXAMPLES=OFF -D WITH_V4L=ON -D WITH_TBB=ON -D OPENCV_ENABLE_NONFREE=1 -D ENABLE_FAST_MATH=1  .. #-D WITH_CUDA=ON -D WITH_CUDNN=ON -D OPENCV_DNN_CUDA=ON -D CUDA_FAST_MATH=1 -D CUDA_ARCH_BIN=7.5 .. 
 
 echo "    - Build and Install"
 make install -j8

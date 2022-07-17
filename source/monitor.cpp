@@ -5,7 +5,6 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-#include <opencv2/xfeatures2d.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/video.hpp>
@@ -84,7 +83,7 @@ class Monitor {
 					this->objects.push_back(obj);
 
 					// TODo <ADD CODE HERE>
-					std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
+					// std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
 				}
 			}
 
@@ -107,13 +106,23 @@ class Monitor {
 				// std::vector<YOLOObject> objects = yolo.detect(frame);
 
 				// Check if the boxes detected match one of the objects.
+				// TODO <ADD CODE HERE>
 				
 			}
 
 			// Draw objects into the frame
 			obj_pointer = this->objects.begin();
 			while (obj_pointer < this->objects.end()) {
-				// TODO <ADD CODE HERE>
+				if (obj_pointer->length() > 0) {
+					// cv::rect()
+					// // Bottom right corner.
+					// cv::Point brc = cv::Point(x + label_size.width, y + label_size.height + baseLine);
+
+					// // Draw black rectangle.
+					// cv::rectangle(frame, obj_pointer->, brc, BLACK, cv::FILLED);
+					// // TODO <ADD CODE HERE>
+				}
+	
 				obj_pointer++;
 			}
 
