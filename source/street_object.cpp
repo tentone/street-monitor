@@ -59,7 +59,7 @@ class StreetObject {
          * @brief The last frame when this object was updated.
          */
         int frame;
-    
+
         /**
          * @brief Category of the object detected.
          */
@@ -91,7 +91,6 @@ class StreetObject {
             if (this->length() == 0) {
                 throw "There are no frames for the object.";
             }
-
 
             return this->frames.back();
         }

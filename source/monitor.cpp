@@ -33,6 +33,8 @@ class Monitor {
 		 */
         std::vector<StreetObject> objects;
 
+		int skip_frames = 500;
+
 		int frame_count = 0;
 
 		/**
@@ -50,7 +52,12 @@ class Monitor {
 		 * @param fname 
 		 */
 		void processFrame(cv::Mat *frame) {
-			if (frame_count == 0) {
+			if(frame_count < skip_frames) {
+				frame_count++;
+				return;
+			}
+
+			if (frame_count == skip_frames) {
 				this->initialize(frame);
 				frame_count++;
 				return;
@@ -82,8 +89,6 @@ class Monitor {
 					obj.updateKeypoint(moving[i], frame_count);
 					this->objects.push_back(obj);
 
-					// TODo <ADD CODE HERE>
-					// std::cout << "X: " << moving[i].pt.x << ", Y: " << moving[i].pt.y << ", Rad: " << moving[i].size << std::endl;
 				}
 			}
 
@@ -103,24 +108,20 @@ class Monitor {
 
 			if (frame_count % 30 == 0){
 				// Detect objects using the YOLO DNN
-				// std::vector<YOLOObject> objects = yolo.detect(frame);
+				std::vector<YOLOObject> objects = yolo.detect(frame);
 
 				// Check if the boxes detected match one of the objects.
 				// TODO <ADD CODE HERE>
-				
+	
 			}
 
 			// Draw objects into the frame
 			obj_pointer = this->objects.begin();
 			while (obj_pointer < this->objects.end()) {
 				if (obj_pointer->length() > 0) {
-					// cv::rect()
-					// // Bottom right corner.
-					// cv::Point brc = cv::Point(x + label_size.width, y + label_size.height + baseLine);
-
-					// // Draw black rectangle.
-					// cv::rectangle(frame, obj_pointer->, brc, BLACK, cv::FILLED);
-					// // TODO <ADD CODE HERE>
+					StreetObjectFrameInfo info = obj_pointer->last();
+					cv::Rect rect = info.boudingBox();
+					cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), cv::Scalar(0,0,255), cv::FILLED);
 				}
 	
 				obj_pointer++;
