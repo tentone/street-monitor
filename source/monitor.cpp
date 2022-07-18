@@ -108,11 +108,27 @@ class Monitor {
 
 			if (frame_count % 30 == 0){
 				// Detect objects using the YOLO DNN
-				std::vector<YOLOObject> objects = yolo.detect(frame);
+				std::vector<YOLOObject> yolo_objects = yolo.detect(frame);
+				auto yolo_object = yolo_objects.begin();
 
 				// Check if the boxes detected match one of the objects.
-				// TODO <ADD CODE HERE>
-	
+				while (yolo_object < yolo_objects.end()) {
+					auto obj_pointer = this->objects.begin();
+					while (obj_pointer < this->objects.end()) {
+						if (obj_pointer->collidesRect(yolo_object->box)) {
+							// Vehicles
+							if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
+								obj_pointer->category = vehicle;
+							// Pedestrians
+							} else if (yolo_object->class_id < 2) {
+								obj_pointer->category = pedestrian;
+							}
+							break;
+						}
+						obj_pointer++;
+					}
+					yolo_object++;
+				}
 			}
 
 			// Draw objects into the frame
@@ -121,7 +137,8 @@ class Monitor {
 				if (obj_pointer->length() > 0) {
 					StreetObjectFrameInfo info = obj_pointer->last();
 					cv::Rect rect = info.boudingBox();
-					cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), cv::Scalar(0,0,255), cv::FILLED);
+					cv::Scalar color = obj_pointer->category == vehicle ? cv::Scalar(0,255,0) : obj_pointer->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
+					cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 2);
 				}
 	
 				obj_pointer++;

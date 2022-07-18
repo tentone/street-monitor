@@ -24,3 +24,16 @@ bool intersectCircleRect(cv::Point center, float radius, cv::Rect rect)
 
     return (corner_dst_sq <= pow(radius, 2));
 }
+
+
+/**
+ * @brief Check the inteserction between two rectangles.
+ * 
+ * @param a Rect object.
+ * @param b Rect object.
+ * @return True if there is intesection, false otherwise.
+ */
+bool intersectRect(cv::Rect a, cv::Rect b)
+{
+    return (a & b).area() > 0;
+}

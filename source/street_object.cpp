@@ -40,7 +40,6 @@ class StreetObjectFrameInfo {
     }
 };
 
-
 int _id = 0;
 
 /**
@@ -65,6 +64,8 @@ class StreetObject {
          */
         Category category;
         
+        
+
         // Detection of this object
         std::vector<StreetObjectFrameInfo> frames;
 
@@ -118,6 +119,17 @@ class StreetObject {
             auto box = this->boudingBox();
           
             return intersectCircleRect(kp.pt, kp.size, box);
+        }
+
+        /**
+         * @brief Check if object collides with rect from new frame.
+         */
+        bool collidesRect(cv::Rect rect)
+        {
+            auto frame = this->last();
+            auto box = this->boudingBox();
+          
+            return intersectRect(box, rect);
         }
 
         /**
