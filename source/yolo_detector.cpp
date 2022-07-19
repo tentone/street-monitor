@@ -3,6 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#pragma once
+
 cv::Scalar BLACK = cv::Scalar(0,0,0);
 cv::Scalar BLUE = cv::Scalar(255,0,0);
 cv::Scalar YELLOW = cv::Scalar(0,255, 255);

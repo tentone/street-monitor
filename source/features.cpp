@@ -6,6 +6,8 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/xfeatures2d.hpp>
 
+#pragma once
+
 class Features {
     public:
 		/**

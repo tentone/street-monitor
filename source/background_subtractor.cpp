@@ -5,6 +5,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 
+#pragma once
+
 class BackgroundSubtractor {
 	public:
 		/**

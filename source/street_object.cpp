@@ -3,7 +3,9 @@
 
 #include <opencv2/core.hpp>
 
-#include "utils.cpp"
+#include "math_utils.cpp"
+
+#pragma once
 
 /**
  * @brief Possible categories detected by the system.

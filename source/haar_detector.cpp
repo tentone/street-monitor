@@ -5,6 +5,8 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/objdetect.hpp>
 
+#pragma once
+
 class HaarDetector {
     public:
 		/**

@@ -10,6 +10,7 @@
 #include <opencv2/video.hpp>
 #include <opencv2/objdetect.hpp>
 
+#pragma once
 
 class OpticalFlow {
     public:

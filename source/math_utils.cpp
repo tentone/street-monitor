@@ -1,6 +1,8 @@
 #include <opencv2/core.hpp>
 #include <math.h>
 
+#pragma once
+
 /**
  * @brief Check the inteserction between a circle and a rect.
  * 

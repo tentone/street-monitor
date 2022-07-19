@@ -1,6 +1,9 @@
 #include <iostream>
 #include <sstream>
 #include <future>
+#include <thread>
+#include <functional>
+#include <exception>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -15,8 +18,9 @@
 #include "haar_detector.cpp"
 #include "background_subtractor.cpp"
 #include "features.cpp"
-#include "tracker.cpp"
 #include "street_object.cpp"
+
+#pragma once
 
 class Monitor {
 	public:
@@ -106,6 +110,7 @@ class Monitor {
 				obj_pointer++;
 			}
 
+	
 			if (frame_count % 30 == 0){
 				// Detect objects using the YOLO DNN
 				std::vector<YOLOObject> yolo_objects = yolo.detect(frame);
