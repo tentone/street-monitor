@@ -28,7 +28,7 @@ class Monitor {
 
 		HaarDetector car_haar = HaarDetector("./models/haar/car.xml");
 
-		// YOLODetector yolo = YOLODetector("./models/yolo/yolov5x.onnx", "./models/yolo/yolo.names");
+		YOLODetector yolo = YOLODetector("./models/yolo/yolov5x.onnx", "./models/yolo/yolo.names");
 
 		BackgroundSubtractor background_detector;
 
@@ -98,7 +98,7 @@ class Monitor {
 
 
 			// // If an object has not been seen for more than n frames remove it
-			// static const int max_age = 100;
+			// static const int max_age = 10000;
 			// auto obj_pointer = this->objects.begin();
 			// while (obj_pointer < this->objects.end()) {
 			// 	int age = frame_count - (*obj_pointer).frame;
@@ -106,35 +106,34 @@ class Monitor {
 			// 		obj_pointer = this->objects.erase(obj_pointer);
 			// 		continue;
 			// 	}
-
 			// 	obj_pointer++;
 			// }
 
 	
-			// if (frame_count % 30 == 0){
-			// 	// Detect objects using the YOLO DNN
-			// 	std::vector<YOLOObject> yolo_objects = yolo.detect(frame);
-			// 	auto yolo_object = yolo_objects.begin();
+			if (frame_count % 30 == 0){
+				// Detect objects using the YOLO DNN
+				std::vector<YOLOObject> yolo_objects = yolo.detect(frame);
+				auto yolo_object = yolo_objects.begin();
 
-			// 	// Check if the boxes detected match one of the objects.
-			// 	while (yolo_object < yolo_objects.end()) {
-			// 		auto obj_pointer = this->objects.begin();
-			// 		while (obj_pointer < this->objects.end()) {
-			// 			if (obj_pointer->collidesRect(yolo_object->box)) {
-			// 				// Vehicles
-			// 				if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
-			// 					obj_pointer->category = vehicle;
-			// 				// Pedestrians
-			// 				} else if (yolo_object->class_id < 2) {
-			// 					obj_pointer->category = pedestrian;
-			// 				}
-			// 				break;
-			// 			}
-			// 			obj_pointer++;
-			// 		}
-			// 		yolo_object++;
-			// 	}
-			// }
+				// Check if the boxes detected match one of the objects.
+				while (yolo_object < yolo_objects.end()) {
+					auto obj_pointer = this->objects.begin();
+					while (obj_pointer < this->objects.end()) {
+						if (obj_pointer->collidesRect(yolo_object->box)) {
+							// Vehicles
+							if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
+								obj_pointer->category = vehicle;
+							// Pedestrians
+							} else if (yolo_object->class_id < 2) {
+								obj_pointer->category = pedestrian;
+							}
+							break;
+						}
+						obj_pointer++;
+					}
+					yolo_object++;
+				}
+			}
 
 
 			this->drawDebug(frame);
