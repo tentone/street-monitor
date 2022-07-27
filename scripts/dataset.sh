@@ -14,10 +14,14 @@ else
 fi
 
 echo " - Download dataset"
+https://www.youtube.com/watch?v=wqctLW0Hb_0
 echo "    - Highway traffic"
 yt-dlp https://www.youtube.com/watch?v=nt3D26lrkho -o ../dataset/highway-traffic.mp4
 
-echo "    - Highway Traffic Low Camera Shake"
+echo "    - Highway traffic B"
+yt-dlp https://www.youtube.com/watch?v=wqctLW0Hb_0 -o ../dataset/highway-traffic-b.mp4
+
+echo "    - Highway Traffic Camera Shake"
 yt-dlp https://www.youtube.com/watch?v=KBsqQez-O4w -o ../dataset/highway-traffic-shake.mp4
 
 echo "    - Street Traffic Curve"
