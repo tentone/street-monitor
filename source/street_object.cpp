@@ -12,36 +12,6 @@
  */
 enum Category { unknown, vehicle, pedestrian };
 
-/**
- * @brief Detection of an object in an frame
- */
-class StreetObjectFrameInfo {
-    public:
-        /**
-         * @brief Frame number for this detection.
-         */
-        int frame;
-
-        /**
-         * @brief Center of the object detected
-         */
-        cv::Point center;
-        
-        /**
-         * @brief Size of the bounding box for the object in this frame
-         */
-        cv::Size size;
-
-    /**
-     * @brief Get the bouding box for this frame.
-     */
-    cv::Rect boudingBox() {
-        cv::Point corner = cv::Point(this->center.x - this->size.width / 2, this->center.y - this->size.height / 2);
-
-        return cv::Rect(corner, this->size);
-    }
-};
-
 int _id = 0;
 
 /**
@@ -66,10 +36,15 @@ class StreetObject {
          */
         Category category;
         
-        
+        /**
+         * @brief Size of the bounding box for the object in this frame
+         */
+        cv::Size size;
 
-        // Detection of this object
-        std::vector<StreetObjectFrameInfo> frames;
+        /**
+         * @brief Position of this object in the last frames.
+         */
+        std::vector<cv::Point> frames;
 
         StreetObject() {
             this->id = _id++;
@@ -88,9 +63,9 @@ class StreetObject {
         /**
          * @brief Get the last frame of the object.
          * 
-         * @return StreetObjectFrameInfo 
+         * @return Last point where the object was. 
          */
-        StreetObjectFrameInfo last() {
+        cv::Point last() {
             if (this->length() == 0) {
                 throw "There are no frames for the object.";
             }
@@ -104,12 +79,8 @@ class StreetObject {
         void updateKeypoint(cv::KeyPoint kp, int frame)
         {
             this->frame = frame;
-
-            StreetObjectFrameInfo info;
-            info.frame = frame;
-            info.center = cv::Point(kp.pt.x, kp.pt.y);
-            info.size = cv::Size(kp.size, kp.size);
-            this->frames.push_back(info);
+            this->size = cv::Size(kp.size, kp.size);
+            this->frames.push_back(cv::Point(kp.pt.x, kp.pt.y));
         }
 
         /**
@@ -143,7 +114,12 @@ class StreetObject {
                 throw "There are no frames for the object.";
             }
 
-            return this->last().boudingBox();
+
+            cv::Point last = this->last();
+
+            cv::Point corner = cv::Point(last.x - this->size.width / 2, last.y - this->size.height / 2);
+
+            return cv::Rect(corner, this->size);
         }
 
         /**
@@ -161,8 +137,8 @@ class StreetObject {
             cv::Point avg = cv::Point();
 
             for (int i = 0; i < this->frames.size() - 1; i++) {
-                avg.x += this->frames[i + 1].center.x - this->frames[i].center.x;
-                avg.y += this->frames[i + 1].center.y - this->frames[i].center.y;
+                avg.x += this->frames[i + 1].x - this->frames[i].x;
+                avg.y += this->frames[i + 1].y - this->frames[i].y;
             }
 
             avg.x /= this->frames.size();
