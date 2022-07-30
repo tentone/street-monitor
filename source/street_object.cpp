@@ -65,7 +65,7 @@ class StreetObject {
          * 
          * @return Last point where the object was. 
          */
-        cv::Point last() {
+        cv::Point position() {
             if (this->length() == 0) {
                 throw "There are no frames for the object.";
             }
@@ -88,7 +88,7 @@ class StreetObject {
          */
         bool collidesKeypoint(cv::KeyPoint kp)
         {
-            auto frame = this->last();
+            auto frame = this->position();
             auto box = this->boudingBox();
           
             return intersectCircleRect(kp.pt, kp.size, box);
@@ -99,7 +99,7 @@ class StreetObject {
          */
         bool collidesRect(cv::Rect rect)
         {
-            auto frame = this->last();
+            auto frame = this->position();
             auto box = this->boudingBox();
           
             return intersectRect(box, rect);
@@ -115,7 +115,7 @@ class StreetObject {
             }
 
 
-            cv::Point last = this->last();
+            cv::Point last = this->position();
 
             cv::Point corner = cv::Point(last.x - this->size.width / 2, last.y - this->size.height / 2);
 

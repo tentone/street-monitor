@@ -149,10 +149,13 @@ class Monitor {
 			auto obj_pointer = this->objects.begin();
 			while (obj_pointer < this->objects.end()) {
 				if (obj_pointer->length() > 0) {
-					cv::Point info = obj_pointer->last();
+					cv::Point info = obj_pointer->position();
 					cv::Rect rect = obj_pointer->boudingBox();
 
 					cv::Scalar color = obj_pointer->category == vehicle ? cv::Scalar(0,255,0) : obj_pointer->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
+					
+					// cv::circle(*frame, 
+
 					cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 2);
 				}
 	
