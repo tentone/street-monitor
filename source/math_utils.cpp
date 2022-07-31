@@ -3,6 +3,31 @@
 
 #pragma once
 
+
+/**
+ * @brief Calculate the distance between two points.
+ */
+float distance(cv::Point a, cv::Pointb)
+{
+    return sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2));
+}
+
+/**
+ * @brief Check the inteserction between a circle and a rect.
+ * 
+ * @param center Center of the circle.
+ * @param radius Radius of the circle.
+ * @param rect Rect object.
+ * @return True if there is intesection, false otherwise.
+ */
+bool intersectPointCircle(cv::Point center, float radius, cv::Point point)
+{
+    float dist = distance(center, point);
+    
+    return dist <= radius;
+}
+
+
 /**
  * @brief Check the inteserction between a circle and a rect.
  * 

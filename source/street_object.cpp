@@ -86,18 +86,15 @@ class StreetObject {
         /**
          * @brief Check if object collides with keypoint from new frame.
          */
-        bool collidesKeypoint(cv::KeyPoint kp)
+        bool insideKeypoint(cv::KeyPoint kp)
         {
-            auto frame = this->position();
-            auto box = this->boudingBox();
-          
-            return intersectCircleRect(kp.pt, kp.size, box);
+            return intersectPointCircle(kp.pt, kp.size, this->position());
         }
 
         /**
          * @brief Check if object collides with rect from new frame.
          */
-        bool collidesRect(cv::Rect rect)
+        bool insideRect(cv::Rect rect)
         {
             auto frame = this->position();
             auto box = this->boudingBox();
@@ -114,11 +111,8 @@ class StreetObject {
                 throw "There are no frames for the object.";
             }
 
-
             cv::Point last = this->position();
-
             cv::Point corner = cv::Point(last.x - this->size.width / 2, last.y - this->size.height / 2);
-
             return cv::Rect(corner, this->size);
         }
 
@@ -129,14 +123,15 @@ class StreetObject {
          * 
          * @return cv::Point 
          */
-        cv::Point averageDirection() {
-            if (this->length() < 2) {
+        cv::Point direction() {
+            const int points = 3;
+             if (this->length() < points) {
                 throw "At least two frames are required to calculate direction.";
             }
-            
+
             cv::Point avg = cv::Point();
 
-            for (int i = 0; i < this->frames.size() - 1; i++) {
+            for (int i = 0; i < this->frames.size() - 1 && i < points - 1; i++) {
                 avg.x += this->frames[i + 1].x - this->frames[i].x;
                 avg.y += this->frames[i + 1].y - this->frames[i].y;
             }

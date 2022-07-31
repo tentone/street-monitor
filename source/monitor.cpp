@@ -80,7 +80,7 @@ class Monitor {
 				for (int j = 0; j < this->objects.size(); j++) {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
-						if (this->objects[j].collidesKeypoint(moving[i])) {
+						if (this->objects[j].insideKeypoint(moving[i])) {
 							this->objects[j].updateKeypoint(moving[i], frame_count);
 							exists = true;
 						}
@@ -119,7 +119,7 @@ class Monitor {
 				while (yolo_object < yolo_objects.end()) {
 					auto obj_pointer = this->objects.begin();
 					while (obj_pointer < this->objects.end()) {
-						if (obj_pointer->collidesRect(yolo_object->box)) {
+						if (obj_pointer->insideRect(yolo_object->box)) {
 							// Vehicles
 							if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
 								obj_pointer->category = vehicle;
@@ -149,14 +149,16 @@ class Monitor {
 			auto obj_pointer = this->objects.begin();
 			while (obj_pointer < this->objects.end()) {
 				if (obj_pointer->length() > 0) {
-					cv::Point info = obj_pointer->position();
+					cv::Point position = obj_pointer->position();
 					cv::Rect rect = obj_pointer->boudingBox();
 
 					cv::Scalar color = obj_pointer->category == vehicle ? cv::Scalar(0,255,0) : obj_pointer->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
 					
-					// cv::circle(*frame, 
+					cv::circle(*frame, position, 5, color, cv::FILLED, cv::LINE_8);
 
-					cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 2);
+					// cv::line(*frame,)
+
+					// cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 2);
 				}
 	
 				obj_pointer++;
