@@ -7,7 +7,7 @@
 /**
  * @brief Calculate the distance between two points.
  */
-float distance(cv::Point a, cv::Pointb)
+float distance(cv::Point a, cv::Point b)
 {
     return sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2));
 }

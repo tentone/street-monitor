@@ -98,16 +98,16 @@ class Monitor {
 
 
 			// // If an object has not been seen for more than n frames remove it
-			// static const int max_age = 10000;
-			// auto obj_pointer = this->objects.begin();
-			// while (obj_pointer < this->objects.end()) {
-			// 	int age = frame_count - (*obj_pointer).frame;
-			// 	if (age > max_age) {
-			// 		obj_pointer = this->objects.erase(obj_pointer);
-			// 		continue;
-			// 	}
-			// 	obj_pointer++;
-			// }
+			static const int max_age = 10;
+			auto obj_pointer = this->objects.begin();
+			while (obj_pointer < this->objects.end()) {
+				int age = frame_count - (*obj_pointer).frame;
+				if (age > max_age) {
+					obj_pointer = this->objects.erase(obj_pointer);
+					continue;
+				}
+				obj_pointer++;
+			}
 
 	
 			if (frame_count % 30 == 0){
@@ -150,14 +150,16 @@ class Monitor {
 			while (obj_pointer < this->objects.end()) {
 				if (obj_pointer->length() > 0) {
 					cv::Point position = obj_pointer->position();
-					cv::Rect rect = obj_pointer->boudingBox();
-
-					cv::Scalar color = obj_pointer->category == vehicle ? cv::Scalar(0,255,0) : obj_pointer->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
 					
+					cv::Scalar color = obj_pointer->category == vehicle ? cv::Scalar(0,255,0) : obj_pointer->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
 					cv::circle(*frame, position, 5, color, cv::FILLED, cv::LINE_8);
+					
+					cv::putText(*frame, std::to_string(obj_pointer->id), position, cv::FONT_HERSHEY_PLAIN, 1.0, color, 1, cv::LINE_AA);
 
-					// cv::line(*frame,)
+					cv::Point direction = obj_pointer->direction();
+					cv::line(*frame, position, position + direction * 4, color, 1, cv::LINE_8);
 
+					// cv::Rect rect = obj_pointer->boudingBox();
 					// cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 2);
 				}
 	

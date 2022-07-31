@@ -124,22 +124,15 @@ class StreetObject {
          * @return cv::Point 
          */
         cv::Point direction() {
-            const int points = 3;
-             if (this->length() < points) {
-                throw "At least two frames are required to calculate direction.";
+            const int points = 5;
+
+            if (this->frames.size() < points) {
+                return cv::Point(0.0, 0.0);
             }
 
-            cv::Point avg = cv::Point();
+            int length = this->frames.size() - 1;
 
-            for (int i = 0; i < this->frames.size() - 1 && i < points - 1; i++) {
-                avg.x += this->frames[i + 1].x - this->frames[i].x;
-                avg.y += this->frames[i + 1].y - this->frames[i].y;
-            }
-
-            avg.x /= this->frames.size();
-            avg.y /= this->frames.size();
-
-            return avg;
+            return cv::Point(this->frames[length].x - this->frames[length - points + 1].x, this->frames[length].y - this->frames[length - points + 1].y);
         }
 };
 
