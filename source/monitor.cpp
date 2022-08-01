@@ -19,6 +19,7 @@
 #include "background_subtractor.cpp"
 #include "features.cpp"
 #include "street_object.cpp"
+#include "math_utils.cpp"
 
 #pragma once
 
@@ -74,31 +75,22 @@ class Monitor {
 			
 			// Iterate list of moving objects
 			for (int i = 0; i < moving.size(); i++) {
-				bool exists = false;
-				
 				// Check if the moving box intersects one of the objects 
 				for (int j = 0; j < this->objects.size(); j++) {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
-						if (this->objects[j].insideKeypoint(moving[i])) {
-							this->objects[j].updateKeypoint(moving[i], frame_count);
-							exists = true;
+
+						if (intersectPointCircle(moving[i].pt, 40.0, this->objects[j].position())) {
+							cv::Point pos = cv::Point(moving[i].pt.x, moving[i].pt.y);
+							this->objects[j].updatePosition(pos, frame_count);
 						}
 					}
-				}
-
-				// Create new object in the list
-				if (!exists) {
-					StreetObject obj;
-					obj.updateKeypoint(moving[i], frame_count);
-					this->objects.push_back(obj);
-
 				}
 			}
 
 
-			// // If an object has not been seen for more than n frames remove it
-			static const int max_age = 10;
+			// If an object has not been seen for more than n frames remove it
+			static const int max_age = 10000;
 			auto obj_pointer = this->objects.begin();
 			while (obj_pointer < this->objects.end()) {
 				int age = frame_count - (*obj_pointer).frame;
@@ -118,19 +110,37 @@ class Monitor {
 				// Check if the boxes detected match one of the objects.
 				while (yolo_object < yolo_objects.end()) {
 					auto obj_pointer = this->objects.begin();
+					bool exists = false;
+
 					while (obj_pointer < this->objects.end()) {
 						if (obj_pointer->insideRect(yolo_object->box)) {
-							// Vehicles
-							if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
-								obj_pointer->category = vehicle;
-							// Pedestrians
-							} else if (yolo_object->class_id < 2) {
-								obj_pointer->category = pedestrian;
-							}
+
+							exists = true;
 							break;
 						}
 						obj_pointer++;
 					}
+
+					// Create new object in the list
+					if (!exists) {
+						StreetObject obj;
+
+						// Vehicles
+						if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
+							obj.category = vehicle;
+						// Pedestrians
+						} else if (yolo_object->class_id < 2) {
+							obj.category = pedestrian;
+						} else {
+							obj.category = unknown;
+						}
+
+						cv::Rect box = yolo_object->box;
+						obj.updatePosition(cv::Point(box.x + box.width / 2.0, box.y + box.height / 2.0), frame_count);
+						this->objects.push_back(obj);
+					}
+
+
 					yolo_object++;
 				}
 			}

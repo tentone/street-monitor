@@ -76,11 +76,10 @@ class StreetObject {
         /**
          * @brief Update with keypoint position.
          */
-        void updateKeypoint(cv::KeyPoint kp, int frame)
+        void updatePosition(cv::Point position, int frame)
         {
             this->frame = frame;
-            this->size = cv::Size(kp.size, kp.size);
-            this->frames.push_back(cv::Point(kp.pt.x, kp.pt.y));
+            this->frames.push_back(position);
         }
 
         /**
