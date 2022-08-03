@@ -4,8 +4,7 @@
  - Estimates the speed of each object and a direction vector.
  - Tracking performed based on object centroid position obtained from background subtraction and blob segmentation.
 
-<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/d.png" width="380">
-<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/g.png" width="380">
+<img src="https://raw.githubusercontent.com/tentone/street-monitor/main/readme/d.png" width="380"><img src="https://raw.githubusercontent.com/tentone/street-monitor/main/readme/g.png" width="380"><img src="https://raw.githubusercontent.com/tentone/street-monitor/main/readme/h.png" width="380">
 
 ### Gettings started
 
@@ -27,8 +26,7 @@
  - YOLO V5 is available on https://pytorch.org/hub/ultralytics_yolov5/ / https://github.com/ultralytics/yolov5, check the latest releases on github.
     - The PyTorch models have to be converted into ONNX files.
 
-<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/f.png" width="380">
-<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/a.png" width="380">
+<img src="https://raw.githubusercontent.com/tentone/street-monitor/main/readme/f.png" width="380"><img src="https://raw.githubusercontent.com/tentone/street-monitor/main/readme/a.png" width="380">
 
 ### License
 - This project is distributed under MIT license and can be freely used for commercial applications.

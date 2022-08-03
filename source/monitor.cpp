@@ -73,13 +73,15 @@ class Monitor {
 			cv::Mat mov = background_detector.update(frame);
 			std::vector<cv::KeyPoint> moving = background_detector.segmentBlobs(frame, &mov);
 			
+			static const float tracking_speed = 40.0; 
+
 			// Iterate list of moving objects
 			for (int i = 0; i < moving.size(); i++) {
 				// Check if the moving box intersects one of the objects 
 				for (int j = 0; j < this->objects.size(); j++) {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
-						if (intersectPointCircle(moving[i].pt, 30.0, this->objects[j].position())) {
+						if (intersectPointCircle(moving[i].pt, tracking_speed, this->objects[j].position())) {
 							cv::Point pos = cv::Point(moving[i].pt.x, moving[i].pt.y);
 							this->objects[j].updatePosition(pos, frame_count);
 						}
@@ -89,7 +91,7 @@ class Monitor {
 
 
 			// If an object has not been seen for more than n frames remove it
-			static const int max_age = 100;
+			static const int max_age = 10;
 			for (auto obj_ptr = this->objects.begin(); obj_ptr < this->objects.end(); obj_ptr++) {
 				int age = frame_count - (*obj_ptr).frame;
 				if (age > max_age) {
@@ -175,8 +177,10 @@ class Monitor {
 
 					cv::putText(*frame, std::to_string(obj_ptr->id), cv::Point(pos.x + 10, pos.y), cv::FONT_HERSHEY_PLAIN, 1.0, color, 1, cv::LINE_AA);
 					
-					float factor = 3.0;
-					int speed = std::round(size(direction) * factor);
+					const static float factor = 3.0;
+					const static float y_factor = 900;
+
+					int speed = std::round(size(direction) * (factor + (pos.y / y_factor)));
 					cv::putText(*frame, std::to_string(speed) + " kph", cv::Point(pos.x + 10, pos.y + 20), cv::FONT_HERSHEY_PLAIN, 1.0, color, 1, cv::LINE_AA);
 
 
