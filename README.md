@@ -1,6 +1,11 @@
 # Street Monitor
  - Keeps track of pedestrians and vehicles in the road.
- - Segment zones of the image where vehicles and pedestrians move.
+ - Tracks the movement and direction of all elements in the road.
+ - Estimates the speed of each object and a direction vector.
+ - Tracking performed based on object centroid position obtained from background subtraction and blob segmentation.
+
+<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/d.png" width="380">
+<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/g.png" width="380">
 
 ### Gettings started
 
@@ -12,7 +17,6 @@
 - Dependencies can also be obtained from the conan package manager (https://conan.io/center/)
     - To install dependencies run `conan install .`.
 
-
 ### Dataset
  - Data for testing can be downloaded from youtube.
  - The file scripts/dataset.sh can be used to obtain test data.
@@ -22,6 +26,9 @@
  - YOLO model is used to classify moving objects such as cars and pedestrians.
  - YOLO V5 is available on https://pytorch.org/hub/ultralytics_yolov5/ / https://github.com/ultralytics/yolov5, check the latest releases on github.
     - The PyTorch models have to be converted into ONNX files.
+
+<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/f.png" width="380">
+<img src="https://raw.githubusercontent.com/tentone/street-monitor/master/readme/a.png" width="380">
 
 ### License
 - This project is distributed under MIT license and can be freely used for commercial applications.

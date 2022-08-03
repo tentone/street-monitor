@@ -79,8 +79,7 @@ class Monitor {
 				for (int j = 0; j < this->objects.size(); j++) {
 					// Object still has not been updated in this frame.
 					if (this->objects[j].frame < frame_count) {
-
-						if (intersectPointCircle(moving[i].pt, 40.0, this->objects[j].position())) {
+						if (intersectPointCircle(moving[i].pt, 30.0, this->objects[j].position())) {
 							cv::Point pos = cv::Point(moving[i].pt.x, moving[i].pt.y);
 							this->objects[j].updatePosition(pos, frame_count);
 						}
@@ -90,35 +89,40 @@ class Monitor {
 
 
 			// If an object has not been seen for more than n frames remove it
-			static const int max_age = 10000;
-			auto obj_pointer = this->objects.begin();
-			while (obj_pointer < this->objects.end()) {
-				int age = frame_count - (*obj_pointer).frame;
+			static const int max_age = 100;
+			for (auto obj_ptr = this->objects.begin(); obj_ptr < this->objects.end(); obj_ptr++) {
+				int age = frame_count - (*obj_ptr).frame;
 				if (age > max_age) {
-					obj_pointer = this->objects.erase(obj_pointer);
+					obj_ptr = this->objects.erase(obj_ptr);
 					continue;
 				}
-				obj_pointer++;
 			}
 
-	
 			if (frame_count % 30 == 0){
 				// Detect objects using the YOLO DNN
-				std::vector<YOLOObject> yolo_objects = yolo.detect(frame);
-				auto yolo_object = yolo_objects.begin();
+				std::vector<YOLOObject> yolo_objs = yolo.detect(frame);
+				auto yolo_obj = yolo_objs.begin();
 
 				// Check if the boxes detected match one of the objects.
-				while (yolo_object < yolo_objects.end()) {
-					auto obj_pointer = this->objects.begin();
+				while (yolo_obj < yolo_objs.end()) {
+					
 					bool exists = false;
 
-					while (obj_pointer < this->objects.end()) {
-						if (obj_pointer->insideRect(yolo_object->box)) {
+					for(auto obj_ptr = this->objects.begin(); obj_ptr < this->objects.end(); obj_ptr++) {	
+						// Scale the box to prevent false detections
+						float scale = 0.9;
+						cv::Rect box = yolo_obj->box;
+						box.width *= scale;
+						box.height *= scale;
 
+						// Center of the bouding box 
+						cv::Point center = cv::Point(box.x + box.width / 2.0, box.y + box.height / 2.0);
+
+						if (obj_ptr->insideRect(box)) {
+							obj_ptr->size = cv::Size(box.width / scale, box.height / scale);
 							exists = true;
 							break;
 						}
-						obj_pointer++;
 					}
 
 					// Create new object in the list
@@ -126,22 +130,23 @@ class Monitor {
 						StreetObject obj;
 
 						// Vehicles
-						if (yolo_object->class_id >= 2 && yolo_object->class_id <= 7) {
+						if (yolo_obj->class_id >= 2 && yolo_obj->class_id <= 7) {
 							obj.category = vehicle;
 						// Pedestrians
-						} else if (yolo_object->class_id < 2) {
+						} else if (yolo_obj->class_id < 2) {
 							obj.category = pedestrian;
 						} else {
 							obj.category = unknown;
 						}
 
-						cv::Rect box = yolo_object->box;
+						cv::Rect box = yolo_obj->box;
+						obj.size = cv::Size(box.width, box.height);
 						obj.updatePosition(cv::Point(box.x + box.width / 2.0, box.y + box.height / 2.0), frame_count);
 						this->objects.push_back(obj);
 					}
 
 
-					yolo_object++;
+					yolo_obj++;
 				}
 			}
 
@@ -156,24 +161,30 @@ class Monitor {
 		 */
 		void drawDebug(cv::Mat *frame) {
 			// Draw objects into the frame
-			auto obj_pointer = this->objects.begin();
-			while (obj_pointer < this->objects.end()) {
-				if (obj_pointer->length() > 0) {
-					cv::Point position = obj_pointer->position();
+			auto obj_ptr = this->objects.begin();
+			while (obj_ptr < this->objects.end()) {
+				if (obj_ptr->length() > 0) {
+					cv::Point pos = obj_ptr->position();
 					
-					cv::Scalar color = obj_pointer->category == vehicle ? cv::Scalar(0,255,0) : obj_pointer->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
-					cv::circle(*frame, position, 5, color, cv::FILLED, cv::LINE_8);
+					cv::Scalar color = obj_ptr->category == vehicle ? cv::Scalar(0,255,0) : obj_ptr->category == pedestrian ? cv::Scalar(255,0,0) : cv::Scalar(0,0,255);
+					cv::circle(*frame, pos, 5, color, cv::FILLED, cv::LINE_8);
 					
-					cv::putText(*frame, std::to_string(obj_pointer->id), position, cv::FONT_HERSHEY_PLAIN, 1.0, color, 1, cv::LINE_AA);
 
-					cv::Point direction = obj_pointer->direction();
-					cv::line(*frame, position, position + direction * 4, color, 1, cv::LINE_8);
+					cv::Point direction = obj_ptr->direction();
+					cv::line(*frame, pos, pos + direction * 2, color, 1, cv::LINE_8);
 
-					// cv::Rect rect = obj_pointer->boudingBox();
-					// cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 2);
+					cv::putText(*frame, std::to_string(obj_ptr->id), cv::Point(pos.x + 10, pos.y), cv::FONT_HERSHEY_PLAIN, 1.0, color, 1, cv::LINE_AA);
+					
+					float factor = 3.0;
+					int speed = std::round(size(direction) * factor);
+					cv::putText(*frame, std::to_string(speed) + " kph", cv::Point(pos.x + 10, pos.y + 20), cv::FONT_HERSHEY_PLAIN, 1.0, color, 1, cv::LINE_AA);
+
+
+					cv::Rect rect = obj_ptr->boudingBox();
+					cv::rectangle(*frame, cv::Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), color, 1);
 				}
 	
-				obj_pointer++;
+				obj_ptr++;
 			}
 
 			cv::imshow("Frame", *frame);

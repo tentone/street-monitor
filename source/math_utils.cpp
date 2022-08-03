@@ -3,6 +3,14 @@
 
 #pragma once
 
+/**
+ * @brief Calculate the size of the vector.
+ */
+float size(cv::Point a)
+{
+    return sqrt(pow(a.x, 2) + pow(a.y, 2));
+}
+
 
 /**
  * @brief Calculate the distance between two points.
